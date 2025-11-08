@@ -6,6 +6,7 @@
 #include "input_kb.h"
 #include "window_system.h"
 #include "app_launcher.h"
+#include "theme.h"
 
 static WindowSystem g_wm;
 
@@ -19,6 +20,7 @@ void setup() {
 
     lvgl_setup();
     kb_init();
+    ui_theme::init();
     start_lvgl_tasks();
 
     // Initialize window system and auto-open launcher

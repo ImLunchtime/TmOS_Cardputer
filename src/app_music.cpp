@@ -1,4 +1,5 @@
 #include "app_music.h"
+#include "theme.h"
 
 static void on_dummy_click(lv_event_t* e) {
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
@@ -20,7 +21,7 @@ void AppMusic::onOpen(lv_obj_t* window_root) {
     lv_obj_t* lbl = lv_label_create(btn_play_);
     lv_label_set_text(lbl, "Play/Pause (placeholder)");
     lv_obj_center(lbl);
-    // Ensure the button is focusable from keypad
-    lv_obj_add_flag(btn_play_, LV_OBJ_FLAG_CLICK_FOCUSABLE);
+    // Apply themed button style (pill + small)
+    ui_theme::apply_button(btn_play_);
     lv_obj_add_event_cb(btn_play_, on_dummy_click, LV_EVENT_CLICKED, nullptr);
 }

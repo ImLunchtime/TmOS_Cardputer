@@ -1,5 +1,6 @@
 #include "window_system.h"
 #include "input_kb.h"
+#include "theme.h"
 #include <M5Cardputer.h>
 
 static inline bool obj_is_focusable(lv_obj_t* obj) {
@@ -78,18 +79,18 @@ lv_obj_t* WindowSystem::createWindowContainer(const char* title, lv_coord_t* out
     lv_obj_t* cont = lv_obj_create(lv_scr_act());
     lv_obj_set_size(cont, w, h);
     lv_obj_set_pos(cont, x, y);
-    lv_obj_set_style_radius(cont, 8, 0);
-    lv_obj_set_style_border_width(cont, 2, 0);
-    lv_obj_set_style_border_color(cont, lv_palette_main(LV_PALETTE_BLUE), 0);
-    lv_obj_set_style_pad_all(cont, 6, 0);
-    lv_obj_set_style_bg_color(cont, lv_color_make(30, 30, 30), 0);
+    // Apply themed window styles
+    ui_theme::apply_window(cont);
 
     // Simple title label at top-left
     if (title) {
         lv_obj_t* lbl = lv_label_create(cont);
         lv_label_set_text(lbl, title);
         lv_obj_align(lbl, LV_ALIGN_TOP_LEFT, 4, 2);
-        lv_obj_set_style_text_color(lbl, lv_color_white(), 0);
+        // Use dark text on light window background
+        lv_obj_set_style_text_color(lbl, lv_color_hex(0x222222), 0);
+        // Slightly larger small font for better readability
+        lv_obj_set_style_text_font(lbl, &lv_font_montserrat_10, 0);
     }
 
     // Bring to foreground

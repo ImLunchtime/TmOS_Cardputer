@@ -1,5 +1,6 @@
 #include "app_launcher.h"
 #include "app_music.h"
+#include "theme.h"
 
 static void on_music_btn_event(lv_event_t* e) {
     // Retrieve launcher instance from user_data
@@ -29,8 +30,8 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_t* lbm = lv_label_create(btn_music_);
     lv_label_set_text(lbm, "Music (placeholder)");
     lv_obj_center(lbm);
-    // Ensure button can be focused by keypad
-    lv_obj_add_flag(btn_music_, LV_OBJ_FLAG_CLICK_FOCUSABLE);
+    // Apply themed button style (pill + small)
+    ui_theme::apply_button(btn_music_);
     lv_obj_add_event_cb(btn_music_, on_music_btn_event, LV_EVENT_CLICKED, this);
 }
 
