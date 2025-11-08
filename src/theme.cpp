@@ -19,17 +19,17 @@ void apply_small_text_recursive(lv_obj_t* root) {
 void apply_window(lv_obj_t* window) {
     if (!window) return;
     // Rounded corners
-    lv_obj_set_style_radius(window, 12, 0);
-    // Background: near white efefef
-    lv_obj_set_style_bg_color(window, lv_color_hex(0xEFEFEF), 0);
+    lv_obj_set_style_radius(window, 0, 0);
+    // Dark background
+    lv_obj_set_style_bg_color(window, lv_color_hex(0x1E1E1E), 0);
     lv_obj_set_style_bg_opa(window, LV_OPA_COVER, 0);
-    // Border: pure white
+    // Border: subtle light border on dark
     lv_obj_set_style_border_width(window, 2, 0);
-    lv_obj_set_style_border_color(window, lv_color_hex(0xFFFFFF), 0);
-    lv_obj_set_style_border_opa(window, LV_OPA_COVER, 0);
+    lv_obj_set_style_border_color(window, lv_color_hex(0xBBBBBB), 0);
+    lv_obj_set_style_border_opa(window, LV_OPA_60, 0);
     // Soft drop shadow
-    lv_obj_set_style_shadow_color(window, lv_color_hex(0x999999), 0);
-    lv_obj_set_style_shadow_opa(window, LV_OPA_50, 0);
+    lv_obj_set_style_shadow_color(window, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_shadow_opa(window, LV_OPA_20, 0);
     lv_obj_set_style_shadow_width(window, 12, 0);
     lv_obj_set_style_shadow_spread(window, 0, 0);
     lv_obj_set_style_shadow_ofs_x(window, 4, 0);
@@ -48,12 +48,29 @@ void apply_button(lv_obj_t* btn) {
     // Pill-shaped radius
     lv_obj_set_style_radius(btn, LV_RADIUS_CIRCLE, 0);
     // Smaller size
-    lv_obj_set_size(btn, 120, 28);
+    lv_obj_set_size(btn, 120, 20);
     // Small font for button and its label children
     apply_small_text_recursive(btn);
     // Optional: tighter paddings for a compact look
     lv_obj_set_style_pad_ver(btn, 6, 0);
     lv_obj_set_style_pad_hor(btn, 12, 0);
+    // Dark button base with light text
+    lv_obj_set_style_bg_color(btn, lv_color_hex(0x2A2A2A), 0);
+    lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, 0);
+    lv_obj_set_style_text_color(btn, lv_color_hex(0xEEEEEE), 0);
+}
+
+lv_obj_t* create_wallpaper() {
+    lv_obj_t* wp = lv_obj_create(lv_scr_act());
+    // Remove default styles to act as simple colored layer
+    lv_obj_remove_style_all(wp);
+    lv_obj_set_size(wp, lv_disp_get_hor_res(NULL), lv_disp_get_ver_res(NULL));
+    lv_obj_set_style_bg_color(wp, lv_color_hex(0x111111), 0);
+    lv_obj_set_style_bg_opa(wp, LV_OPA_COVER, 0);
+    lv_obj_clear_flag(wp, LV_OBJ_FLAG_SCROLLABLE);
+    // Send wallpaper to background
+    lv_obj_move_background(wp);
+    return wp;
 }
 
 } // namespace ui_theme

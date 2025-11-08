@@ -1,4 +1,3 @@
-// Basic LVGL template for M5Cardputer + LVGL keyboard input
 #include <M5Cardputer.h>
 #include <lvgl.h>
 
@@ -21,6 +20,8 @@ void setup() {
     lvgl_setup();
     kb_init();
     ui_theme::init();
+    // Create wallpaper (solid black) behind windows
+    ui_theme::create_wallpaper();
     start_lvgl_tasks();
 
     // Initialize window system and auto-open launcher

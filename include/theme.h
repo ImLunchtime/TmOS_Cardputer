@@ -13,4 +13,7 @@ namespace ui_theme {
 
     // Set small text font on this object and its descendants
     void apply_small_text_recursive(lv_obj_t* root);
+
+    // Create a wallpaper behind all windows (currently solid black)
+    lv_obj_t* create_wallpaper();
 }

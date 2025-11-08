@@ -58,8 +58,8 @@ lv_obj_t* WindowSystem::createWindowContainer(const char* title, lv_coord_t* out
     const lv_coord_t scr_h = lv_disp_get_ver_res(NULL);
 
     // Choose a window size smaller than screen
-    lv_coord_t w = scr_w - 30; // leave margin
-    lv_coord_t h = scr_h - 25;
+    lv_coord_t w = scr_w - 40; // leave margin
+    lv_coord_t h = scr_h - 30;
     if (w < 100) w = scr_w; // fallback
     if (h < 60)  h = scr_h;
 
@@ -87,8 +87,8 @@ lv_obj_t* WindowSystem::createWindowContainer(const char* title, lv_coord_t* out
         lv_obj_t* lbl = lv_label_create(cont);
         lv_label_set_text(lbl, title);
         lv_obj_align(lbl, LV_ALIGN_TOP_LEFT, 4, 2);
-        // Use dark text on light window background
-        lv_obj_set_style_text_color(lbl, lv_color_hex(0x222222), 0);
+        // Use light text on dark window background
+        lv_obj_set_style_text_color(lbl, lv_color_hex(0xEEEEEE), 0);
         // Slightly larger small font for better readability
         lv_obj_set_style_text_font(lbl, &lv_font_montserrat_10, 0);
     }
