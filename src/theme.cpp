@@ -95,4 +95,34 @@ lv_obj_t* create_wallpaper() {
     return wp;
 }
 
+void apply_list_menu(lv_obj_t* list) {
+    if (!list) return;
+    // Keep default LVGL look; reduce spacing between child items.
+    // In LVGL v8, list items are separate button objects; style them individually.
+    lv_obj_set_style_pad_row(list, 0, 0);
+
+    // Apply compact style to existing children
+    uint32_t child_cnt = lv_obj_get_child_cnt(list);
+    for (uint32_t i = 0; i < child_cnt; ++i) {
+        lv_obj_t* child = lv_obj_get_child(list, i);
+        // Only style buttons (list items); other children (e.g., scrollbar) are skipped.
+        apply_small_text_recursive(child);
+        lv_obj_set_style_pad_top(child, 2, 0);
+        lv_obj_set_style_pad_bottom(child, 2, 0);
+        lv_obj_set_style_pad_left(child, 6, 0);
+        lv_obj_set_style_pad_right(child, 6, 0);
+        lv_obj_set_style_min_height(child, 16, 0);
+    }
+}
+
+void apply_list_menu_item(lv_obj_t* item) {
+    if (!item) return;
+    apply_small_text_recursive(item);
+    lv_obj_set_style_pad_top(item, 2, 0);
+    lv_obj_set_style_pad_bottom(item, 2, 0);
+    lv_obj_set_style_pad_left(item, 6, 0);
+    lv_obj_set_style_pad_right(item, 6, 0);
+    lv_obj_set_style_min_height(item, 16, 0);
+}
+
 } // namespace ui_theme

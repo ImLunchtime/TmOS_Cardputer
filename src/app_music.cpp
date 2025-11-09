@@ -96,6 +96,8 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_size(list_, lv_pct(100), lv_pct(100));
     lv_obj_set_flex_grow(list_, 1);
     lv_obj_add_flag(list_, LV_OBJ_FLAG_SCROLLABLE);
+    // Apply compact list menu style (16px item height)
+    ui_theme::apply_list_menu(list_);
 
     // Player view container (initially hidden), also fills window
     player_view_ = lv_obj_create(parent);
@@ -170,6 +172,8 @@ void AppMusic::addDir(const char* dir) {
                 names_.push_back(basename(path));
                 // Add button to list
                 lv_obj_t* btn = lv_list_add_btn(list_, LV_SYMBOL_AUDIO, names_.back().c_str());
+                // Ensure compact 16px item style applies to each list button
+                ui_theme::apply_list_menu_item(btn);
                 lv_obj_add_event_cb(btn, on_list_item_clicked, LV_EVENT_CLICKED, this);
             }
         }

@@ -14,6 +14,12 @@ namespace ui_theme {
     // Apply themed styles to a generic button (pill + small)
     void apply_button(lv_obj_t* btn);
 
+    // Apply compact item style to list menus (16px item height)
+    void apply_list_menu(lv_obj_t* list);
+
+    // Apply compact 16px style to a single list menu item (button)
+    void apply_list_menu_item(lv_obj_t* item);
+
     // Set small text font on this object and its descendants
     void apply_small_text_recursive(lv_obj_t* root);
 
