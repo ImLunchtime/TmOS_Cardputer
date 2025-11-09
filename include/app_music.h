@@ -13,6 +13,12 @@
 #include <AudioFileSourceID3.h>
 #include <AudioGeneratorMP3.h>
 
+// FreeRTOS (ESP32)
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/queue.h>
+#include <freertos/semphr.h>
+
 // Lightweight audio output that feeds samples to M5Cardputer speaker
 class AudioOutputM5Speaker : public AudioOutput {
 public:
@@ -55,7 +61,7 @@ private:
     size_t tri_index_ = 0;
 };
 
-// Simple Music app: scan SD for MP3s and play selected file
+// Music app: scans SD for MP3s and plays via a dedicated RTOS audio task
 class AppMusic : public IApp {
 public:
     AppMusic() = default;
@@ -83,16 +89,51 @@ private:
     // SD manager for proper SPI pin setup
     SDFileManager sd_;
 
-    // Audio components
+    // Audio components (owned by audio task)
     AudioFileSourceSD* file_ = nullptr;
     AudioFileSourceID3* id3_ = nullptr;
     AudioGeneratorMP3* mp3_ = nullptr;
     AudioOutputM5Speaker* out_ = nullptr;
 
+    // RTOS audio task plumbing
+    enum AudioCommand {
+        AUDIO_CMD_PLAY,
+        AUDIO_CMD_PAUSE,
+        AUDIO_CMD_STOP,
+        AUDIO_CMD_NEXT,
+        AUDIO_CMD_PREV,
+        AUDIO_CMD_VOLUME,
+        AUDIO_CMD_SHUTDOWN
+    };
+
+    struct AudioTaskCommand {
+        AudioCommand cmd;
+        int param;                 // e.g., volume percent
+        char filePath[128];        // path to play (optional)
+    };
+
+    struct AudioStatus {
+        bool isPlaying = false;
+        bool isPaused = false;
+        int currentFileIndex = -1;
+        int currentVolume = 50;
+        char currentSongName[64] = {0};
+        bool hasError = false;
+        char errorMessage[128] = {0};
+    };
+
+    TaskHandle_t audioTaskHandle_ = nullptr;
+    QueueHandle_t audioCommandQueue_ = nullptr;
+    SemaphoreHandle_t audioStatusMutex_ = nullptr;
+    AudioStatus audioStatus_;
+    bool audio_initialized_ = false;
+
     // UI helpers
     void buildUI(lv_obj_t* parent);
     void updateStatus(const char* text);
     void updateNowPlaying(const char* text);
+    void updateUIFromAudioStatus();
+    void handleNextPrevRequests();
 
     // Files
     void scanMusic();
@@ -103,8 +144,26 @@ private:
     void playIndex(int idx);
     void playByName(const char* name);
     void stopPlayback();
+    void playNextSong();
+    void playPreviousSong();
 
     // Events
     static void on_list_item_clicked(lv_event_t* e);
     static void on_volume_event(lv_event_t* e);
+
+    // Audio task (runs on its own core)
+    void initializeAudioTask();
+    static void audioTaskThunk(void* parameter);
+    void audioTaskLoop();
+
+    // Audio task internal helpers
+    void sendAudioCommand(AudioCommand cmd, int param = 0, const char* filePath = nullptr);
+    void playAudioFile(const char* filePath);
+    void pauseAudioPlayback();
+    void resumeAudioPlayback();
+    void stopAudioPlaybackInternal();
+    void cleanupAudioTask();
+    void setAudioVolume(int volume);
+    void updateAudioStatus(bool playing, bool paused, const char* songPath);
+    void updateAudioError(const char* errorMsg);
 };

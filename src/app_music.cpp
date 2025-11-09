@@ -1,6 +1,7 @@
 #include "app_music.h"
 #include "theme.h"
 #include <SD.h>
+#include <cstring>
 
 static bool ends_with_ci(const std::string& s, const char* suffix) {
     size_t n = s.size();
@@ -27,7 +28,7 @@ void AppMusic::onOpen(lv_obj_t* window_root) {
 
     // Speaker config tuned for smoother audio on Cardputer
     auto spk_cfg = M5Cardputer.Speaker.config();
-    spk_cfg.sample_rate = 96000;
+    spk_cfg.sample_rate = 128000; // match reference for smoother output
     spk_cfg.task_pinned_core = APP_CPU_NUM;
     M5Cardputer.Speaker.config(spk_cfg);
 
@@ -44,25 +45,36 @@ void AppMusic::onOpen(lv_obj_t* window_root) {
     lv_slider_set_value(volume_, 50, LV_ANIM_OFF);
     M5Cardputer.Speaker.setVolume((50 * 255) / 100);
 
+    // Initialize dedicated audio task and command queue
+    initializeAudioTask();
+
     // Scan SD for music files
     scanMusic();
 }
 
 void AppMusic::onTick() {
-    // Drive MP3 playback
-    if (mp3_) {
-        if (mp3_->isRunning()) {
-            if (!mp3_->loop()) {
-                // Finished
-                updateStatus("Finished");
-                stopPlayback();
-            }
-        }
-    }
+    // Drive UI updates from audio status and handle next/prev requests
+    handleNextPrevRequests();
+    updateUIFromAudioStatus();
 }
 
 void AppMusic::onClose() {
-    stopPlayback();
+    // Request audio task shutdown and clean up RTOS resources
+    sendAudioCommand(AUDIO_CMD_SHUTDOWN);
+    if (audioTaskHandle_) {
+        // Allow task to exit gracefully
+        vTaskDelay(pdMS_TO_TICKS(50));
+        audioTaskHandle_ = nullptr;
+    }
+    if (audioCommandQueue_) {
+        vQueueDelete(audioCommandQueue_);
+        audioCommandQueue_ = nullptr;
+    }
+    if (audioStatusMutex_) {
+        vSemaphoreDelete(audioStatusMutex_);
+        audioStatusMutex_ = nullptr;
+    }
+    cleanupAudioTask();
     // UI objects are deleted by WindowSystem when container is destroyed
 }
 
@@ -160,48 +172,14 @@ void AppMusic::playByName(const char* name) {
 
 void AppMusic::playIndex(int idx) {
     if (idx < 0 || idx >= (int)paths_.size()) return;
-
-    stopPlayback();
-
-    // Build audio pipeline
-    file_ = new AudioFileSourceSD();
-    if (!file_->open(paths_[idx].c_str())) {
-        updateStatus("Open failed");
-        delete file_; file_ = nullptr;
-        return;
-    }
-
-    id3_ = new AudioFileSourceID3(file_);
-    out_ = new AudioOutputM5Speaker(&M5Cardputer.Speaker, 0);
-    mp3_ = new AudioGeneratorMP3();
-
-    if (!mp3_->begin(id3_, out_)) {
-        updateStatus("Playback init failed");
-        delete mp3_; mp3_ = nullptr;
-        delete out_; out_ = nullptr;
-        delete id3_; id3_ = nullptr;
-        file_->close(); delete file_; file_ = nullptr;
-        return;
-    }
-
     current_index_ = idx;
-    is_playing_ = true;
     updateNowPlaying(names_[idx].c_str());
-    updateStatus("Playing");
+    sendAudioCommand(AUDIO_CMD_PLAY, 0, paths_[idx].c_str());
 }
 
 void AppMusic::stopPlayback() {
-    if (mp3_) {
-        if (mp3_->isRunning()) mp3_->stop();
-        delete mp3_; mp3_ = nullptr;
-    }
-    if (out_) { out_->stop(); delete out_; out_ = nullptr; }
-    if (id3_) { delete id3_; id3_ = nullptr; }
-    if (file_) { file_->close(); delete file_; file_ = nullptr; }
-    if (is_playing_) {
-        is_playing_ = false;
-        current_index_ = -1;
-    }
+    // Delegate stopping to audio task
+    sendAudioCommand(AUDIO_CMD_STOP);
 }
 
 void AppMusic::on_list_item_clicked(lv_event_t* e) {
@@ -222,6 +200,292 @@ void AppMusic::on_volume_event(lv_event_t* e) {
     if (lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED) {
         int v = lv_slider_get_value(app->volume_);
         if (v < 0) v = 0; if (v > 100) v = 100;
-        M5Cardputer.Speaker.setVolume((v * 255) / 100);
+        app->sendAudioCommand(AUDIO_CMD_VOLUME, v);
     }
+}
+
+// ===== RTOS audio task implementation =====
+
+void AppMusic::initializeAudioTask() {
+    // Clean previous state
+    cleanupAudioTask();
+
+    // Create command queue and status mutex
+    audioCommandQueue_ = xQueueCreate(10, sizeof(AudioTaskCommand));
+    audioStatusMutex_ = xSemaphoreCreateMutex();
+    if (!audioCommandQueue_ || !audioStatusMutex_) {
+        updateStatus("Audio queue/mutex fail");
+        return;
+    }
+
+    // Start audio task on core 0
+    BaseType_t ok = xTaskCreatePinnedToCore(
+        audioTaskThunk,
+        "AudioTask",
+        8192,
+        this,
+        1,
+        &audioTaskHandle_,
+        0
+    );
+    if (ok != pdPASS) {
+        updateStatus("Audio task create fail");
+        vQueueDelete(audioCommandQueue_); audioCommandQueue_ = nullptr;
+        vSemaphoreDelete(audioStatusMutex_); audioStatusMutex_ = nullptr;
+        return;
+    }
+    audio_initialized_ = true;
+}
+
+void AppMusic::audioTaskThunk(void* parameter) {
+    AppMusic* app = static_cast<AppMusic*>(parameter);
+    app->audioTaskLoop();
+}
+
+void AppMusic::audioTaskLoop() {
+    // Build audio components inside task
+    file_ = new AudioFileSourceSD();
+    out_ = new AudioOutputM5Speaker(&M5Cardputer.Speaker, 0);
+    mp3_ = new AudioGeneratorMP3();
+    id3_ = nullptr;
+
+    if (!out_ || !mp3_ || !file_) {
+        updateAudioError("Audio components alloc fail");
+        cleanupAudioTask();
+        vTaskDelete(nullptr);
+        return;
+    }
+
+    if (!out_->begin()) {
+        updateAudioError("Audio out begin fail");
+        cleanupAudioTask();
+        vTaskDelete(nullptr);
+        return;
+    }
+
+    // Set output format (MP3 defaults)
+    out_->SetRate(44100);
+    out_->SetBitsPerSample(16);
+    out_->SetChannels(2);
+
+    AudioTaskCommand command{};
+    for (;;) {
+        // If playing, drive decoder
+        if (mp3_ && mp3_->isRunning()) {
+            if (!mp3_->loop()) {
+                // Finished current track
+                stopAudioPlaybackInternal();
+                updateAudioError("Song finished");
+            }
+        }
+
+        // Handle commands
+        if (xQueueReceive(audioCommandQueue_, &command, pdMS_TO_TICKS(1)) == pdTRUE) {
+            switch (command.cmd) {
+                case AUDIO_CMD_PLAY:
+                    if (strlen(command.filePath) > 0) {
+                        playAudioFile(command.filePath);
+                    } else {
+                        resumeAudioPlayback();
+                    }
+                    break;
+                case AUDIO_CMD_PAUSE:
+                    pauseAudioPlayback();
+                    break;
+                case AUDIO_CMD_STOP:
+                    stopAudioPlaybackInternal();
+                    break;
+                case AUDIO_CMD_NEXT:
+                    updateAudioError("Next requested");
+                    break;
+                case AUDIO_CMD_PREV:
+                    updateAudioError("Previous requested");
+                    break;
+                case AUDIO_CMD_VOLUME:
+                    setAudioVolume(command.param);
+                    break;
+                case AUDIO_CMD_SHUTDOWN:
+                    stopAudioPlaybackInternal();
+                    cleanupAudioTask();
+                    vTaskDelete(nullptr);
+                    return;
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(1));
+    }
+}
+
+void AppMusic::sendAudioCommand(AudioCommand cmd, int param, const char* filePath) {
+    if (!audioCommandQueue_) return;
+    AudioTaskCommand c{};
+    c.cmd = cmd;
+    c.param = param;
+    if (filePath) {
+        strncpy(c.filePath, filePath, sizeof(c.filePath) - 1);
+        c.filePath[sizeof(c.filePath) - 1] = '\0';
+    } else {
+        c.filePath[0] = '\0';
+    }
+    xQueueSend(audioCommandQueue_, &c, 0);
+}
+
+void AppMusic::playAudioFile(const char* filePath) {
+    // Stop current first
+    stopAudioPlaybackInternal();
+    vTaskDelay(pdMS_TO_TICKS(50));
+
+    if (!filePath || strlen(filePath) == 0) {
+        updateAudioError("Invalid file path");
+        return;
+    }
+
+    if (!file_->open(filePath)) {
+        updateAudioError("Open failed");
+        return;
+    }
+
+    id3_ = new AudioFileSourceID3(file_);
+    if (!id3_) {
+        updateAudioError("ID3 alloc fail");
+        file_->close();
+        return;
+    }
+
+    if (mp3_->begin(id3_, out_)) {
+        updateAudioStatus(true, false, filePath);
+    } else {
+        updateAudioError("Playback init fail");
+        delete id3_; id3_ = nullptr;
+        file_->close();
+    }
+}
+
+void AppMusic::pauseAudioPlayback() {
+    if (mp3_ && mp3_->isRunning()) {
+        mp3_->stop();
+        updateAudioStatus(false, true, nullptr);
+    }
+}
+
+void AppMusic::resumeAudioPlayback() {
+    // No-op: rely on PLAY with filePath to resume
+}
+
+void AppMusic::stopAudioPlaybackInternal() {
+    if (mp3_) {
+        if (mp3_->isRunning()) mp3_->stop();
+    }
+    if (out_) { out_->flush(); out_->stop(); }
+    if (id3_) { delete id3_; id3_ = nullptr; }
+    if (file_) { if (file_->isOpen()) file_->close(); }
+    updateAudioStatus(false, false, nullptr);
+}
+
+void AppMusic::cleanupAudioTask() {
+    if (mp3_) { delete mp3_; mp3_ = nullptr; }
+    if (out_) { delete out_; out_ = nullptr; }
+    if (id3_) { delete id3_; id3_ = nullptr; }
+    if (file_) { delete file_; file_ = nullptr; }
+}
+
+void AppMusic::setAudioVolume(int volume) {
+    if (volume < 0) volume = 0; if (volume > 100) volume = 100;
+    M5Cardputer.Speaker.setVolume((volume * 255) / 100);
+    if (audioStatusMutex_ && xSemaphoreTake(audioStatusMutex_, pdMS_TO_TICKS(5)) == pdTRUE) {
+        audioStatus_.currentVolume = volume;
+        xSemaphoreGive(audioStatusMutex_);
+    }
+}
+
+void AppMusic::updateAudioStatus(bool playing, bool paused, const char* songPath) {
+    if (!audioStatusMutex_) return;
+    if (xSemaphoreTake(audioStatusMutex_, pdMS_TO_TICKS(10)) == pdTRUE) {
+        audioStatus_.isPlaying = playing;
+        audioStatus_.isPaused = paused;
+        audioStatus_.hasError = false;
+        audioStatus_.errorMessage[0] = '\0';
+        if (songPath && strlen(songPath) > 0) {
+            const char* base = strrchr(songPath, '/');
+            base = base ? base + 1 : songPath;
+            strncpy(audioStatus_.currentSongName, base, sizeof(audioStatus_.currentSongName) - 1);
+            audioStatus_.currentSongName[sizeof(audioStatus_.currentSongName) - 1] = '\0';
+            // Find index
+            for (size_t i = 0; i < paths_.size(); ++i) {
+                if (paths_[i] == songPath) { audioStatus_.currentFileIndex = (int)i; break; }
+            }
+        } else if (!playing) {
+            audioStatus_.currentSongName[0] = '\0';
+            audioStatus_.currentFileIndex = -1;
+        }
+        xSemaphoreGive(audioStatusMutex_);
+    }
+}
+
+void AppMusic::updateAudioError(const char* errorMsg) {
+    if (!audioStatusMutex_) return;
+    if (xSemaphoreTake(audioStatusMutex_, pdMS_TO_TICKS(10)) == pdTRUE) {
+        audioStatus_.hasError = true;
+        strncpy(audioStatus_.errorMessage, errorMsg ? errorMsg : "", sizeof(audioStatus_.errorMessage) - 1);
+        audioStatus_.errorMessage[sizeof(audioStatus_.errorMessage) - 1] = '\0';
+        xSemaphoreGive(audioStatusMutex_);
+    }
+}
+
+void AppMusic::updateUIFromAudioStatus() {
+    if (!audioStatusMutex_) return;
+    if (xSemaphoreTake(audioStatusMutex_, pdMS_TO_TICKS(5)) == pdTRUE) {
+        // Now playing label
+        if (audioStatus_.isPlaying && strlen(audioStatus_.currentSongName) > 0) {
+            updateNowPlaying(audioStatus_.currentSongName);
+            updateStatus("Playing");
+        } else if (audioStatus_.isPaused) {
+            updateNowPlaying("Paused");
+            updateStatus("Paused");
+        } else {
+            updateNowPlaying("-");
+        }
+        // Error status
+        if (audioStatus_.hasError && strlen(audioStatus_.errorMessage) > 0) {
+            updateStatus(audioStatus_.errorMessage);
+        }
+        xSemaphoreGive(audioStatusMutex_);
+    }
+}
+
+void AppMusic::handleNextPrevRequests() {
+    if (!audioStatusMutex_) return;
+    if (xSemaphoreTake(audioStatusMutex_, pdMS_TO_TICKS(1)) == pdTRUE) {
+        if (audioStatus_.hasError) {
+            if (strstr(audioStatus_.errorMessage, "Song finished") || strstr(audioStatus_.errorMessage, "Next requested")) {
+                audioStatus_.hasError = false;
+                audioStatus_.errorMessage[0] = '\0';
+                xSemaphoreGive(audioStatusMutex_);
+                playNextSong();
+                return;
+            } else if (strstr(audioStatus_.errorMessage, "Previous requested")) {
+                audioStatus_.hasError = false;
+                audioStatus_.errorMessage[0] = '\0';
+                xSemaphoreGive(audioStatusMutex_);
+                playPreviousSong();
+                return;
+            }
+        }
+        xSemaphoreGive(audioStatusMutex_);
+    }
+}
+
+void AppMusic::playNextSong() {
+    if (paths_.empty()) return;
+    int next = current_index_ >= 0 ? (current_index_ + 1) % (int)paths_.size() : 0;
+    current_index_ = next;
+    updateNowPlaying(names_[next].c_str());
+    sendAudioCommand(AUDIO_CMD_PLAY, 0, paths_[next].c_str());
+}
+
+void AppMusic::playPreviousSong() {
+    if (paths_.empty()) return;
+    int prev = current_index_ >= 0 ? (current_index_ - 1 + (int)paths_.size()) % (int)paths_.size() : 0;
+    current_index_ = prev;
+    updateNowPlaying(names_[prev].c_str());
+    sendAudioCommand(AUDIO_CMD_PLAY, 0, paths_[prev].c_str());
 }
