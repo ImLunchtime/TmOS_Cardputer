@@ -24,7 +24,7 @@ void setup() {
     ui_theme::init();
     // Create wallpaper (solid black) behind windows
     ui_theme::create_wallpaper();
-    start_lvgl_tasks();
+    // Drive LVGL from loop() to avoid cross-thread races
 
     // Initialize window system and auto-open launcher
     g_wm.openApp(std::unique_ptr<IApp>(new AppLauncher(g_wm)));
@@ -32,6 +32,9 @@ void setup() {
 
 void loop() {
     kb_process_hardware_keys();
+    // Run LVGL timers on the main thread
+    lv_timer_handler();
+    lv_tick_inc(5);
     // Drive window system: only active app runs
     // Update the window manager (handles BtnA close for non-launcher)
     g_wm.update();

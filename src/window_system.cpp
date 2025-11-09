@@ -154,10 +154,14 @@ void WindowSystem::openApp(std::unique_ptr<IApp> app) {
     stack_.push_back(std::move(entry));
 
     applyActiveState();
+    // Diagnostics: report the new window and its focus group
+    const WindowEntry& top = stack_.back();
+    Serial.printf("[WM] openApp: root=%p group=%p pos=(%d,%d) size=(%d,%d)\n", (void*)top.root, (void*)top.group, (int)top.x, (int)top.y, (int)top.w, (int)top.h);
 }
 
 void WindowSystem::closeTop() {
     if (stack_.empty()) return;
+    Serial.printf("[WM] closeTop: stack size before=%u\n", (unsigned)stack_.size());
     auto entry = std::move(stack_.back());
     stack_.pop_back();
 
@@ -178,6 +182,7 @@ void WindowSystem::closeTop() {
     }
 
     applyActiveState();
+    Serial.printf("[WM] closeTop: stack size after=%u\n", (unsigned)stack_.size());
 }
 
 void WindowSystem::update() {

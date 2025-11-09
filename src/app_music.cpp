@@ -62,9 +62,11 @@ void AppMusic::onTick() {
 
 void AppMusic::onClose() {
     // Request audio task shutdown; audio task will perform resource cleanup
+    Serial.println("[Music] onClose: requesting audio shutdown");
     sendAudioCommand(AUDIO_CMD_SHUTDOWN);
     if (audioTaskHandle_) {
         // Allow task to exit gracefully
+        Serial.printf("[Music] onClose: waiting 50ms, task=%p\n", (void*)audioTaskHandle_);
         vTaskDelay(pdMS_TO_TICKS(50));
         audioTaskHandle_ = nullptr;
     }
@@ -305,15 +307,18 @@ void AppMusic::initializeAudioTask() {
         return;
     }
     audio_initialized_ = true;
+    Serial.printf("[Music] audio task created: handle=%p, queue=%p, mutex=%p\n", (void*)audioTaskHandle_, (void*)audioCommandQueue_, (void*)audioStatusMutex_);
 }
 
 void AppMusic::audioTaskThunk(void* parameter) {
     AppMusic* app = static_cast<AppMusic*>(parameter);
+    Serial.println("[Music] audioTaskThunk: start");
     app->audioTaskLoop();
 }
 
 void AppMusic::audioTaskLoop() {
     // Build audio components inside task
+    Serial.println("[Music] audioTaskLoop: start");
     file_ = new AudioFileSourceSD();
     out_ = new AudioOutputM5Speaker(&M5Cardputer.Speaker, 0);
     mp3_ = new AudioGeneratorMP3();
@@ -351,6 +356,7 @@ void AppMusic::audioTaskLoop() {
 
         // Handle commands
         if (xQueueReceive(audioCommandQueue_, &command, pdMS_TO_TICKS(1)) == pdTRUE) {
+            Serial.printf("[Music] audioTaskLoop: received cmd=%d param=%d file='%s'\n", (int)command.cmd, (int)command.param, command.filePath);
             switch (command.cmd) {
                 case AUDIO_CMD_PLAY:
                     if (strlen(command.filePath) > 0) {
@@ -380,6 +386,7 @@ void AppMusic::audioTaskLoop() {
                     // Delete RTOS primitives from within the audio task to avoid races
                     if (audioCommandQueue_) { vQueueDelete(audioCommandQueue_); audioCommandQueue_ = nullptr; }
                     if (audioStatusMutex_) { vSemaphoreDelete(audioStatusMutex_); audioStatusMutex_ = nullptr; }
+                    Serial.println("[Music] audioTaskLoop: shutdown cleanup complete; deleting task");
                     vTaskDelete(nullptr);
                     return;
             }
