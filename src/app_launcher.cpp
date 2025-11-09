@@ -21,14 +21,10 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_flex_flow(root_, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_row(root_, 8, 0);
 
-    // Title label inside window body (note: window already displays its title)
-    lv_obj_t* lbl = lv_label_create(root_);
-    lv_label_set_text(lbl, "Select an app to launch:");
-
     // Music app button
     btn_music_ = lv_btn_create(root_);
     lv_obj_t* lbm = lv_label_create(btn_music_);
-    lv_label_set_text(lbm, "Music (placeholder)");
+    lv_label_set_text(lbm, "Music");
     lv_obj_center(lbm);
     // Apply themed button style (pill + small)
     ui_theme::apply_button(btn_music_);
