@@ -1,14 +1,36 @@
 #include "theme.h"
+#include <lvgl.h>
+
+// Declare custom font defined in src/simhei_12.c
+LV_FONT_DECLARE(simhei_12);
 
 namespace ui_theme {
 
+// Keep a single system-wide font pointer
+static const lv_font_t* k_sys_font = &simhei_12;
+
 void init() {
-    // Currently no dynamic resources required
+    // Initialize default LVGL theme with the custom font for all widgets
+    lv_disp_t* disp = lv_disp_get_default();
+    if (disp) {
+        lv_theme_t* th = lv_theme_default_init(
+            disp,
+            lv_palette_main(LV_PALETTE_BLUE),
+            lv_palette_main(LV_PALETTE_GREY),
+            true,                  // dark mode
+            k_sys_font             // custom system font
+        );
+        lv_disp_set_theme(disp, th);
+    }
+}
+
+const lv_font_t* get_system_font() {
+    return k_sys_font;
 }
 
 void apply_small_text_recursive(lv_obj_t* root) {
     if (!root) return;
-    lv_obj_set_style_text_font(root, &lv_font_montserrat_10, 0);
+    lv_obj_set_style_text_font(root, k_sys_font, 0);
     uint32_t child_cnt = lv_obj_get_child_cnt(root);
     for (uint32_t i = 0; i < child_cnt; ++i) {
         lv_obj_t* child = lv_obj_get_child(root, i);

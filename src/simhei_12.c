@@ -24705,7 +24705,10 @@ lv_font_t simhei_12 = {
     .underline_position = -1,
     .underline_thickness = 1,
 #endif
+/* `static_bitmap` exists in LVGL v7 and earlier only */
+#if LVGL_VERSION_MAJOR < 8
     .static_bitmap = 0,
+#endif
     .dsc = &font_dsc,          /*The custom font data. Will be accessed by `get_glyph_bitmap/dsc` */
 #if LV_VERSION_CHECK(8, 2, 0) || LVGL_VERSION_MAJOR >= 9
     .fallback = &lv_font_montserrat_10,

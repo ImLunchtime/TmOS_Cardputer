@@ -89,8 +89,8 @@ lv_obj_t* WindowSystem::createWindowContainer(const char* title, lv_coord_t* out
         lv_obj_align(lbl, LV_ALIGN_TOP_LEFT, 4, 2);
         // Use light text on dark window background
         lv_obj_set_style_text_color(lbl, lv_color_hex(0xEEEEEE), 0);
-        // Slightly larger small font for better readability
-        lv_obj_set_style_text_font(lbl, &lv_font_montserrat_10, 0);
+        // Use system font provided by theme
+        lv_obj_set_style_text_font(lbl, ui_theme::get_system_font(), 0);
     }
 
     // Bring to foreground

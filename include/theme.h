@@ -5,6 +5,9 @@ namespace ui_theme {
     // Initialize theme resources if needed
     void init();
 
+    // Access the system font set by theme initialization
+    const lv_font_t* get_system_font();
+
     // Apply themed styles to a window container
     void apply_window(lv_obj_t* window);
 
