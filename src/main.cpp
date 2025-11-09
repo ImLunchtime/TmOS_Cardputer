@@ -5,6 +5,8 @@
 #include "input_kb.h"
 #include "window_system.h"
 #include "app_launcher.h"
+#include "app_theme_center.h"
+#include "app_settings.h"
 #include "theme.h"
 
 static WindowSystem g_wm;
