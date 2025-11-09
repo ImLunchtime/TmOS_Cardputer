@@ -53,6 +53,11 @@ WindowSystem::~WindowSystem() {
 }
 
 lv_obj_t* WindowSystem::createWindowContainer(const char* title, lv_coord_t* out_w, lv_coord_t* out_h, lv_coord_t* out_x, lv_coord_t* out_y) const {
+    // Backward-compatible wrapper: default to Dark
+    return createWindowContainer(title, out_w, out_h, out_x, out_y, ui_theme::ThemeId::Dark);
+}
+
+lv_obj_t* WindowSystem::createWindowContainer(const char* title, lv_coord_t* out_w, lv_coord_t* out_h, lv_coord_t* out_x, lv_coord_t* out_y, ui_theme::ThemeId theme) const {
     // Screen resolution based on lvgl_port setup
     const lv_coord_t scr_w = lv_disp_get_hor_res(NULL);
     const lv_coord_t scr_h = lv_disp_get_ver_res(NULL);
@@ -64,12 +69,12 @@ lv_obj_t* WindowSystem::createWindowContainer(const char* title, lv_coord_t* out
     if (h < 60)  h = scr_h;
 
     // Position logic: top-left by default; offset from previous by (+30, +20)
-    lv_coord_t x = 0;
-    lv_coord_t y = 0;
+    lv_coord_t x = 5;
+    lv_coord_t y = 4;
     if (!stack_.empty()) {
         const WindowEntry& prev = stack_.back();
-        x = prev.x + 30;
-        y = prev.y + 20;
+        x = prev.x + 20;
+        y = prev.y + 15;
         if (x + w > scr_w) x = scr_w - w;
         if (y + h > scr_h) y = scr_h - h;
         if (x < 0) x = 0;
@@ -79,18 +84,19 @@ lv_obj_t* WindowSystem::createWindowContainer(const char* title, lv_coord_t* out
     lv_obj_t* cont = lv_obj_create(lv_scr_act());
     lv_obj_set_size(cont, w, h);
     lv_obj_set_pos(cont, x, y);
-    // Apply themed window styles
-    ui_theme::apply_window(cont);
+    // Apply themed window styles per app preference
+    ui_theme::apply_window(cont, theme);
 
     // Simple title label at top-left
     if (title) {
         lv_obj_t* lbl = lv_label_create(cont);
         lv_label_set_text(lbl, title);
         lv_obj_align(lbl, LV_ALIGN_TOP_LEFT, 4, 2);
-        // Use light text on dark window background
-        lv_obj_set_style_text_color(lbl, lv_color_hex(0xEEEEEE), 0);
-        // Use system font provided by theme
-        lv_obj_set_style_text_font(lbl, ui_theme::get_system_font(), 0);
+        // Dark theme: light text and compact font; Light: keep defaults
+        if (theme == ui_theme::ThemeId::Dark) {
+            lv_obj_set_style_text_color(lbl, lv_color_hex(0xEEEEEE), 0);
+            lv_obj_set_style_text_font(lbl, ui_theme::get_system_font(), 0);
+        }
     }
 
     // Bring to foreground
@@ -136,7 +142,7 @@ void WindowSystem::applyActiveState() {
 void WindowSystem::openApp(std::unique_ptr<IApp> app) {
     if (!app) return;
     lv_coord_t w, h, x, y;
-    lv_obj_t* cont = createWindowContainer(app->title(), &w, &h, &x, &y);
+    lv_obj_t* cont = createWindowContainer(app->title(), &w, &h, &x, &y, app->theme());
     // Let the app build its UI inside the window container
     app->onOpen(cont);
 
@@ -177,6 +183,8 @@ void WindowSystem::closeTop() {
         entry.group = nullptr;
     }
     if (entry.root) {
+        // Clear theme association for this window before deletion
+        ui_theme::clear_window_theme(entry.root);
         lv_obj_del(entry.root);
         entry.root = nullptr;
     }

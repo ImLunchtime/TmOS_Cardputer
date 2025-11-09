@@ -4,15 +4,15 @@
 
 static void lv_tick_task(void *arg) {
     while (1) {
-        lv_tick_inc(10);
-        vTaskDelay(pdMS_TO_TICKS(10));
+        lv_tick_inc(2);
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
 }
 
 static void lvgl_task(void *arg) {
     while (1) {
         lv_timer_handler();
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
 }
 

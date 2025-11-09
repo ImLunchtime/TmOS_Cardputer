@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include "theme.h"
 
 // Base interface for apps hosted by the window system
 class IApp {
@@ -23,6 +24,9 @@ public:
 
     // Whether this app is the launcher (cannot be closed with BtnA)
     virtual bool isLauncher() const { return false; }
+
+    // Preferred theme for this app's window
+    virtual ui_theme::ThemeId theme() const { return ui_theme::ThemeId::Light; }
 };
 
 // WindowSystem manages window stacking, positioning and focus control
@@ -58,6 +62,7 @@ private:
 
     // Create a window container and position it based on previous
     lv_obj_t* createWindowContainer(const char* title, lv_coord_t* out_w, lv_coord_t* out_h, lv_coord_t* out_x, lv_coord_t* out_y) const;
+    lv_obj_t* createWindowContainer(const char* title, lv_coord_t* out_w, lv_coord_t* out_h, lv_coord_t* out_x, lv_coord_t* out_y, ui_theme::ThemeId theme) const;
 
     // Build group from focusable children of root
     lv_group_t* buildFocusGroup(lv_obj_t* root) const;

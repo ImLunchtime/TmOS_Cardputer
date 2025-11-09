@@ -41,10 +41,10 @@ void AppMusic::onOpen(lv_obj_t* window_root) {
     }
 
     // Initial volume 50%
-    M5Cardputer.Speaker.setVolume((50 * 255) / 100);
+    M5Cardputer.Speaker.setVolume((50 * 255) / 10);
     if (player_volume_) {
-        lv_slider_set_range(player_volume_, 0, 100);
-        lv_slider_set_value(player_volume_, 50, LV_ANIM_OFF);
+        lv_slider_set_range(player_volume_, 0, 10);
+        lv_slider_set_value(player_volume_, 5, LV_ANIM_OFF);
     }
 
     // Initialize dedicated audio task and command queue
@@ -109,8 +109,8 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     // Volume slider in player view (full width)
     player_volume_ = lv_slider_create(player_view_);
     lv_obj_set_width(player_volume_, lv_pct(100));
-    lv_slider_set_range(player_volume_, 0, 100);
-    lv_slider_set_value(player_volume_, 50, LV_ANIM_OFF);
+    lv_slider_set_range(player_volume_, 0, 10);
+    lv_slider_set_value(player_volume_, 5, LV_ANIM_OFF);
     lv_obj_add_event_cb(player_volume_, on_player_volume_event, LV_EVENT_VALUE_CHANGED, this);
 
     // Back button in player view (full width for easy tap)
@@ -237,7 +237,7 @@ void AppMusic::on_player_volume_event(lv_event_t* e) {
     if (!app) return;
     if (lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED) {
         int v = lv_slider_get_value(app->player_volume_);
-        if (v < 0) v = 0; if (v > 100) v = 100;
+        if (v < 0) v = 0; if (v > 10) v = 10;
         app->sendAudioCommand(AUDIO_CMD_VOLUME, v);
     }
 }
@@ -271,7 +271,7 @@ void AppMusic::on_volume_event(lv_event_t* e) {
     if (!app) return;
     if (lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED) {
         int v = lv_slider_get_value(app->volume_);
-        if (v < 0) v = 0; if (v > 100) v = 100;
+        if (v < 0) v = 0; if (v > 10) v = 10;
         app->sendAudioCommand(AUDIO_CMD_VOLUME, v);
     }
 }
@@ -469,8 +469,8 @@ void AppMusic::cleanupAudioTask() {
 }
 
 void AppMusic::setAudioVolume(int volume) {
-    if (volume < 0) volume = 0; if (volume > 100) volume = 100;
-    M5Cardputer.Speaker.setVolume((volume * 255) / 100);
+    if (volume < 0) volume = 0; if (volume > 10) volume = 10;
+    M5Cardputer.Speaker.setVolume((volume * 255) / 10);
     if (audioStatusMutex_ && xSemaphoreTake(audioStatusMutex_, pdMS_TO_TICKS(5)) == pdTRUE) {
         audioStatus_.currentVolume = volume;
         xSemaphoreGive(audioStatusMutex_);

@@ -32,12 +32,18 @@ void setup() {
 
 void loop() {
     kb_process_hardware_keys();
-    // Run LVGL timers on the main thread
+    // Run LVGL timers on the main thread with dynamic tick
+    static uint32_t last_ms = millis();
+    uint32_t now = millis();
+    uint32_t elapsed = now - last_ms;
+    if (elapsed > 0) {
+        lv_tick_inc(elapsed);
+        last_ms = now;
+    }
     lv_timer_handler();
-    lv_tick_inc(5);
     // Drive window system: only active app runs
-    // Update the window manager (handles BtnA close for non-launcher)
     g_wm.update();
+    // Relax the loop to reduce CPU usage
     delay(5);
     yield();
 }

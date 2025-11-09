@@ -1,5 +1,6 @@
 #pragma once
 #include "window_system.h"
+#include "theme.h"
 
 class AppSettings : public IApp {
 public:
@@ -11,6 +12,8 @@ public:
     void onOpen(lv_obj_t* window_root) override;
     void onTick() override {}
     void onClose() override;
+
+    ui_theme::ThemeId theme() const override { return ui_theme::ThemeId::Light; }
 
 private:
     lv_obj_t* root_ = nullptr;

@@ -2,6 +2,9 @@
 #include <lvgl.h>
 
 namespace ui_theme {
+    // Available themes for per-app selection
+    enum class ThemeId { Dark, Light };
+
     // Initialize theme resources if needed
     void init();
 
@@ -10,6 +13,13 @@ namespace ui_theme {
 
     // Apply themed styles to a window container
     void apply_window(lv_obj_t* window);
+    void apply_window(lv_obj_t* window, ThemeId theme);
+
+    // Query theme associated with an object (walks up to window root)
+    ThemeId get_theme_for(lv_obj_t* obj);
+
+    // Clear theme association for a window (called on window destruction)
+    void clear_window_theme(lv_obj_t* window);
 
     // Apply themed styles to a generic button (pill + small)
     void apply_button(lv_obj_t* btn);
