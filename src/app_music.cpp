@@ -41,9 +41,11 @@ void AppMusic::onOpen(lv_obj_t* window_root) {
     }
 
     // Initial volume 50%
-    lv_slider_set_range(volume_, 0, 100);
-    lv_slider_set_value(volume_, 50, LV_ANIM_OFF);
     M5Cardputer.Speaker.setVolume((50 * 255) / 100);
+    if (player_volume_) {
+        lv_slider_set_range(player_volume_, 0, 100);
+        lv_slider_set_value(player_volume_, 50, LV_ANIM_OFF);
+    }
 
     // Initialize dedicated audio task and command queue
     initializeAudioTask();
@@ -79,35 +81,51 @@ void AppMusic::onClose() {
 }
 
 void AppMusic::buildUI(lv_obj_t* parent) {
-    // Vertical layout
+    // Compact layout: remove extra padding and make views fill window
     lv_obj_set_flex_flow(parent, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_style_pad_all(parent, 6, 0);
-    lv_obj_set_style_pad_row(parent, 6, 0);
+    lv_obj_set_style_pad_all(parent, 0, 0);
+    lv_obj_set_style_pad_row(parent, 0, 0);
     ui_theme::apply_small_text_recursive(parent);
 
-    // Now playing label
-    now_playing_ = lv_label_create(parent);
-    lv_label_set_text(now_playing_, "Now Playing: -");
+    // List view fills the whole window
+    now_playing_ = nullptr; // no header label in compact mode
+    status_ = nullptr;      // no status label in list view
+    volume_ = nullptr;      // no volume slider in list view
 
-    // File list
     list_ = lv_list_create(parent);
-    lv_obj_set_size(list_, lv_pct(100), lv_pct(70));
+    lv_obj_set_size(list_, lv_pct(100), lv_pct(100));
+    lv_obj_set_flex_grow(list_, 1);
     lv_obj_add_flag(list_, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Bottom bar with volume and status
-    lv_obj_t* bar = lv_obj_create(parent);
-    lv_obj_set_flex_flow(bar, LV_FLEX_FLOW_ROW);
-    lv_obj_set_size(bar, lv_pct(100), lv_pct(20));
-    ui_theme::apply_window(bar);
+    // Player view container (initially hidden), also fills window
+    player_view_ = lv_obj_create(parent);
+    lv_obj_set_size(player_view_, lv_pct(100), lv_pct(100));
+    lv_obj_set_flex_grow(player_view_, 1);
+    lv_obj_set_flex_flow(player_view_, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_all(player_view_, 6, 0);
+    lv_obj_set_style_pad_row(player_view_, 6, 0);
+    lv_obj_add_flag(player_view_, LV_OBJ_FLAG_HIDDEN);
 
-    // Volume slider
-    volume_ = lv_slider_create(bar);
-    lv_obj_set_width(volume_, lv_pct(60));
-    lv_obj_add_event_cb(volume_, on_volume_event, LV_EVENT_VALUE_CHANGED, this);
+    // Track name in player view
+    track_name_ = lv_label_create(player_view_);
+    lv_label_set_text(track_name_, "Track: -");
+    lv_label_set_long_mode(track_name_, LV_LABEL_LONG_SCROLL_CIRCULAR);
 
-    // Status label
-    status_ = lv_label_create(bar);
-    lv_label_set_text(status_, "Ready");
+    // Volume slider in player view (full width)
+    player_volume_ = lv_slider_create(player_view_);
+    lv_obj_set_width(player_volume_, lv_pct(100));
+    lv_slider_set_range(player_volume_, 0, 100);
+    lv_slider_set_value(player_volume_, 50, LV_ANIM_OFF);
+    lv_obj_add_event_cb(player_volume_, on_player_volume_event, LV_EVENT_VALUE_CHANGED, this);
+
+    // Back button in player view (full width for easy tap)
+    back_btn_ = lv_btn_create(player_view_);
+    lv_obj_set_width(back_btn_, lv_pct(100));
+    lv_obj_t* back_label = lv_label_create(back_btn_);
+    lv_label_set_text(back_label, "Back");
+    lv_obj_center(back_label);
+    ui_theme::apply_button(back_btn_);
+    lv_obj_add_event_cb(back_btn_, on_back_btn_clicked, LV_EVENT_CLICKED, this);
 }
 
 void AppMusic::updateStatus(const char* text) {
@@ -170,10 +188,67 @@ void AppMusic::playByName(const char* name) {
     }
 }
 
+void AppMusic::switchToPlayerView(const char* trackName) {
+    if (in_player_mode_) return;
+    in_player_mode_ = true;
+
+    // Hide list view elements
+    if (now_playing_) lv_obj_add_flag(now_playing_, LV_OBJ_FLAG_HIDDEN);
+    if (list_) lv_obj_add_flag(list_, LV_OBJ_FLAG_HIDDEN);
+    if (volume_) { lv_obj_t* bar = lv_obj_get_parent(volume_); if (bar) lv_obj_add_flag(bar, LV_OBJ_FLAG_HIDDEN); }
+    if (status_) { lv_obj_t* bar = lv_obj_get_parent(status_); if (bar) lv_obj_add_flag(bar, LV_OBJ_FLAG_HIDDEN); }
+
+    // Show player view
+    lv_obj_clear_flag(player_view_, LV_OBJ_FLAG_HIDDEN);
+
+    // Set track name
+    if (track_name_) {
+        std::string s = std::string("Track: ") + (trackName ? trackName : "-");
+        lv_label_set_text(track_name_, s.c_str());
+    }
+
+    // Force redraw
+    lv_obj_invalidate(root_);
+}
+
+void AppMusic::switchToListView() {
+    if (!in_player_mode_) return;
+    in_player_mode_ = false;
+
+    // Show list view elements
+    if (now_playing_) lv_obj_clear_flag(now_playing_, LV_OBJ_FLAG_HIDDEN);
+    if (list_) lv_obj_clear_flag(list_, LV_OBJ_FLAG_HIDDEN);
+    if (volume_) { lv_obj_t* bar = lv_obj_get_parent(volume_); if (bar) lv_obj_clear_flag(bar, LV_OBJ_FLAG_HIDDEN); }
+    if (status_) { lv_obj_t* bar = lv_obj_get_parent(status_); if (bar) lv_obj_clear_flag(bar, LV_OBJ_FLAG_HIDDEN); }
+
+    // Hide player view
+    lv_obj_add_flag(player_view_, LV_OBJ_FLAG_HIDDEN);
+
+    // Force redraw
+    lv_obj_invalidate(root_);
+}
+
+void AppMusic::on_back_btn_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppMusic*>(lv_event_get_user_data(e));
+    if (!app || lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    app->stopPlayback();
+    app->switchToListView();
+}
+
+void AppMusic::on_player_volume_event(lv_event_t* e) {
+    auto* app = static_cast<AppMusic*>(lv_event_get_user_data(e));
+    if (!app) return;
+    if (lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED) {
+        int v = lv_slider_get_value(app->player_volume_);
+        if (v < 0) v = 0; if (v > 100) v = 100;
+        app->sendAudioCommand(AUDIO_CMD_VOLUME, v);
+    }
+}
+
 void AppMusic::playIndex(int idx) {
     if (idx < 0 || idx >= (int)paths_.size()) return;
     current_index_ = idx;
-    updateNowPlaying(names_[idx].c_str());
+    switchToPlayerView(names_[idx].c_str()); // Switch to player view
     sendAudioCommand(AUDIO_CMD_PLAY, 0, paths_[idx].c_str());
 }
 

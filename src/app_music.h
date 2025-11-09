@@ -79,6 +79,13 @@ private:
     lv_obj_t* status_ = nullptr;
     lv_obj_t* now_playing_ = nullptr;
     lv_obj_t* volume_ = nullptr;
+    lv_obj_t* player_view_ = nullptr;
+    lv_obj_t* track_name_ = nullptr;
+    lv_obj_t* back_btn_ = nullptr;
+    lv_obj_t* player_volume_ = nullptr;
+
+    // View state
+    bool in_player_mode_ = false;
 
     // Files and playback state
     std::vector<std::string> paths_;
@@ -134,6 +141,8 @@ private:
     void updateNowPlaying(const char* text);
     void updateUIFromAudioStatus();
     void handleNextPrevRequests();
+    void switchToPlayerView(const char* trackName);
+    void switchToListView();
 
     // Files
     void scanMusic();
@@ -150,6 +159,8 @@ private:
     // Events
     static void on_list_item_clicked(lv_event_t* e);
     static void on_volume_event(lv_event_t* e);
+    static void on_back_btn_clicked(lv_event_t* e);
+    static void on_player_volume_event(lv_event_t* e);
 
     // Audio task (runs on its own core)
     void initializeAudioTask();
