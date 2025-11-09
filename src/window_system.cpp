@@ -119,9 +119,16 @@ void WindowSystem::applyActiveState() {
             // Active window
             lv_obj_clear_state(win.root, LV_STATE_DISABLED);
             if (indev && win.group) lv_indev_set_group(indev, win.group);
+            else if (indev) lv_indev_set_group(indev, kb_get_group());
         } else {
             // Background window: disable
             lv_obj_add_state(win.root, LV_STATE_DISABLED);
+        }
+    }
+    // If no windows remain, restore default keyboard group
+    if (stack_.empty()) {
+        if (indev) {
+            lv_indev_set_group(indev, kb_get_group());
         }
     }
 }
@@ -154,9 +161,14 @@ void WindowSystem::closeTop() {
     auto entry = std::move(stack_.back());
     stack_.pop_back();
 
+    // Detach input device from this window's group before deletion
+    lv_indev_t* indev = kb_get_indev();
+    if (indev && entry.group) {
+        lv_indev_set_group(indev, NULL);
+    }
+
     if (entry.app) entry.app->onClose();
     if (entry.group) {
-        // Deleting group will auto-detach indev when switching below
         lv_group_del(entry.group);
         entry.group = nullptr;
     }

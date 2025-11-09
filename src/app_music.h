@@ -65,7 +65,7 @@ private:
 class AppMusic : public IApp {
 public:
     AppMusic() = default;
-    ~AppMusic() override { onClose(); }
+    ~AppMusic() override = default;
 
     const char* title() const override { return "Music"; }
     void onOpen(lv_obj_t* window_root) override;

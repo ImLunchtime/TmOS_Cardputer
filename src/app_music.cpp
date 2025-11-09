@@ -61,22 +61,13 @@ void AppMusic::onTick() {
 }
 
 void AppMusic::onClose() {
-    // Request audio task shutdown and clean up RTOS resources
+    // Request audio task shutdown; audio task will perform resource cleanup
     sendAudioCommand(AUDIO_CMD_SHUTDOWN);
     if (audioTaskHandle_) {
         // Allow task to exit gracefully
         vTaskDelay(pdMS_TO_TICKS(50));
         audioTaskHandle_ = nullptr;
     }
-    if (audioCommandQueue_) {
-        vQueueDelete(audioCommandQueue_);
-        audioCommandQueue_ = nullptr;
-    }
-    if (audioStatusMutex_) {
-        vSemaphoreDelete(audioStatusMutex_);
-        audioStatusMutex_ = nullptr;
-    }
-    cleanupAudioTask();
     // UI objects are deleted by WindowSystem when container is destroyed
 }
 
@@ -386,6 +377,9 @@ void AppMusic::audioTaskLoop() {
                 case AUDIO_CMD_SHUTDOWN:
                     stopAudioPlaybackInternal();
                     cleanupAudioTask();
+                    // Delete RTOS primitives from within the audio task to avoid races
+                    if (audioCommandQueue_) { vQueueDelete(audioCommandQueue_); audioCommandQueue_ = nullptr; }
+                    if (audioStatusMutex_) { vSemaphoreDelete(audioStatusMutex_); audioStatusMutex_ = nullptr; }
                     vTaskDelete(nullptr);
                     return;
             }
