@@ -4,6 +4,7 @@
 
 // Declare custom font defined in src/simhei_12.c
 LV_FONT_DECLARE(simhei_12);
+extern const lv_img_dsc_t bg2; // Wallpaper image descriptor from src/bg2.c
 
 namespace ui_theme {
 
@@ -122,16 +123,15 @@ void apply_button(lv_obj_t* btn) {
 }
 
 lv_obj_t* create_wallpaper() {
-    lv_obj_t* wp = lv_obj_create(lv_scr_act());
-    // Remove default styles to act as simple colored layer
-    lv_obj_remove_style_all(wp);
-    lv_obj_set_size(wp, lv_disp_get_hor_res(NULL), lv_disp_get_ver_res(NULL));
-    lv_obj_set_style_bg_color(wp, lv_color_hex(0x111111), 0);
-    lv_obj_set_style_bg_opa(wp, LV_OPA_COVER, 0);
-    lv_obj_clear_flag(wp, LV_OBJ_FLAG_SCROLLABLE);
-    // Send wallpaper to background
-    lv_obj_move_background(wp);
-    return wp;
+    // Create an image widget as the desktop wallpaper using bg2 (240x135)
+    lv_obj_t* img = lv_img_create(lv_scr_act());
+    lv_img_set_src(img, &bg2);
+    lv_obj_set_size(img, lv_disp_get_hor_res(NULL), lv_disp_get_ver_res(NULL));
+    lv_obj_set_pos(img, 0, 0);
+    lv_obj_clear_flag(img, LV_OBJ_FLAG_SCROLLABLE);
+    // Send wallpaper to background behind all windows
+    lv_obj_move_background(img);
+    return img;
 }
 
 void apply_list_menu(lv_obj_t* list) {

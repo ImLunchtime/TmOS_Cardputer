@@ -61,8 +61,8 @@ void kb_process_hardware_keys() {
                 // Skip TAB character to avoid duplicate LV_KEY_NEXT events
                 if (c == '\t') continue;
                 if (status.fn) {
-                    if (c == ';')       key_queue.push_back(LV_KEY_UP);
-                    else if (c == '.')  key_queue.push_back(LV_KEY_DOWN);
+                    if (c == ';')       key_queue.push_back(LV_KEY_PREV);
+                    else if (c == '.')  key_queue.push_back(LV_KEY_NEXT);
                     else if (c == ',')  key_queue.push_back(LV_KEY_LEFT);
                     else if (c == '/')  key_queue.push_back(LV_KEY_RIGHT);
                     else                 key_queue.push_back(static_cast<uint8_t>(c));
