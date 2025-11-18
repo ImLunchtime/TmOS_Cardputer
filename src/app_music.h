@@ -3,6 +3,7 @@
 #include <M5Cardputer.h>
 #include <vector>
 #include <string>
+#include <map>
 
 #include "window_system.h"
 #include "SDFileManager.h"
@@ -86,10 +87,15 @@ private:
 
     // View state
     bool in_player_mode_ = false;
+    enum ListLevel { LEVEL_ARTIST, LEVEL_ALBUM, LEVEL_TRACK };
+    ListLevel list_level_ = LEVEL_ARTIST;
+    std::string current_artist_;
+    std::string current_album_;
 
     // Files and playback state
     std::vector<std::string> paths_;
     std::vector<std::string> names_;
+    std::map<std::string, std::map<std::string, std::vector<int>>> category_;
     int current_index_ = -1;
     bool is_playing_ = false;
 
@@ -143,15 +149,25 @@ private:
     void handleNextPrevRequests();
     void switchToPlayerView(const char* trackName);
     void switchToListView();
+    void populateArtistList();
+    void populateAlbumList(const std::string& artist);
+    void populateTrackList(const std::string& artist, const std::string& album);
+    void rebuildFocusGroup();
+    static bool is_focusable(lv_obj_t* obj);
+    static void add_focusables_recursive(lv_obj_t* node, lv_group_t* group);
 
     // Files
     void scanMusic();
     void addDir(const char* dir);
     static std::string basename(const std::string& path);
+    static std::string stripExtension(const std::string& s);
+    static bool parseNameParts(const std::string& base, std::string& artist, std::string& album, std::string& title);
+    static std::string extractTitle(const std::string& base);
 
     // Playback
     void playIndex(int idx);
     void playByName(const char* name);
+    void playTrackByTitle(const char* title);
     void stopPlayback();
     void playNextSong();
     void playPreviousSong();
@@ -161,6 +177,9 @@ private:
     static void on_volume_event(lv_event_t* e);
     static void on_back_btn_clicked(lv_event_t* e);
     static void on_player_volume_event(lv_event_t* e);
+    static void on_artist_item_clicked(lv_event_t* e);
+    static void on_album_item_clicked(lv_event_t* e);
+    static void on_track_item_clicked(lv_event_t* e);
 
     // Audio task (runs on its own core)
     void initializeAudioTask();

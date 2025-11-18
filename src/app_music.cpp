@@ -1,5 +1,6 @@
 #include "app_music.h"
 #include "theme.h"
+#include "input_kb.h"
 #include <SD.h>
 #include <cstring>
 
@@ -23,6 +24,32 @@ std::string AppMusic::basename(const std::string& path) {
     return path.substr(pos + 1);
 }
 
+std::string AppMusic::stripExtension(const std::string& s) {
+    size_t p = s.find_last_of('.');
+    if (p == std::string::npos) return s;
+    return s.substr(0, p);
+}
+
+bool AppMusic::parseNameParts(const std::string& base, std::string& artist, std::string& album, std::string& title) {
+    std::string stem = stripExtension(base);
+    size_t p1 = stem.find('-');
+    if (p1 == std::string::npos) return false;
+    size_t p2 = stem.find('-', p1 + 1);
+    if (p2 == std::string::npos) return false;
+    if (stem.find('-', p2 + 1) != std::string::npos) return false;
+    artist = stem.substr(0, p1);
+    album = stem.substr(p1 + 1, p2 - p1 - 1);
+    title = stem.substr(p2 + 1);
+    if (artist.empty() || album.empty() || title.empty()) return false;
+    return true;
+}
+
+std::string AppMusic::extractTitle(const std::string& base) {
+    std::string a, b, t;
+    if (parseNameParts(base, a, b, t)) return t;
+    return stripExtension(base);
+}
+
 void AppMusic::onOpen(lv_obj_t* window_root) {
     root_ = window_root;
 
@@ -40,18 +67,19 @@ void AppMusic::onOpen(lv_obj_t* window_root) {
         return;
     }
 
-    // Initial volume 50%
-    M5Cardputer.Speaker.setVolume((50 * 255) / 10);
+    M5Cardputer.Speaker.setVolume((1 * 255) / 10);
     if (player_volume_) {
         lv_slider_set_range(player_volume_, 0, 10);
-        lv_slider_set_value(player_volume_, 5, LV_ANIM_OFF);
+        lv_slider_set_value(player_volume_, 1, LV_ANIM_OFF);
     }
 
     // Initialize dedicated audio task and command queue
     initializeAudioTask();
+    sendAudioCommand(AUDIO_CMD_VOLUME, 1);
 
     // Scan SD for music files
     scanMusic();
+    populateArtistList();
 }
 
 void AppMusic::onTick() {
@@ -110,7 +138,7 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     player_volume_ = lv_slider_create(player_view_);
     lv_obj_set_width(player_volume_, lv_pct(100));
     lv_slider_set_range(player_volume_, 0, 10);
-    lv_slider_set_value(player_volume_, 5, LV_ANIM_OFF);
+    lv_slider_set_value(player_volume_, 1, LV_ANIM_OFF);
     lv_obj_add_event_cb(player_volume_, on_player_volume_event, LV_EVENT_VALUE_CHANGED, this);
 
     // Back button in player view (full width for easy tap)
@@ -163,6 +191,15 @@ void AppMusic::addDir(const char* dir) {
                 else path = std::string(dir) + "/" + name;
                 paths_.push_back(path);
                 names_.push_back(basename(path));
+                {
+                    std::string base = names_.back();
+                    std::string artist, album, title;
+                    if (!parseNameParts(base, artist, album, title)) {
+                        artist = "未分类";
+                        album = "未分类";
+                    }
+                    category_[artist][album].push_back((int)paths_.size() - 1);
+                }
                 // Add button to list
                 lv_obj_t* btn = lv_list_add_btn(list_, LV_SYMBOL_AUDIO, names_.back().c_str());
                 // Ensure compact 16px item style applies to each list button
@@ -173,6 +210,110 @@ void AppMusic::addDir(const char* dir) {
         file = root.openNextFile();
     }
     root.close();
+}
+
+void AppMusic::populateArtistList() {
+    if (!list_) return;
+    lv_obj_clean(list_);
+    list_level_ = LEVEL_ARTIST;
+    current_artist_.clear();
+    current_album_.clear();
+    for (const auto& kv : category_) {
+        lv_obj_t* btn = lv_list_add_btn(list_, LV_SYMBOL_DIRECTORY, kv.first.c_str());
+        ui_theme::apply_list_menu_item(btn);
+        lv_obj_add_event_cb(btn, on_artist_item_clicked, LV_EVENT_CLICKED, this);
+    }
+    rebuildFocusGroup();
+}
+
+void AppMusic::populateAlbumList(const std::string& artist) {
+    if (!list_) return;
+    lv_obj_clean(list_);
+    list_level_ = LEVEL_ALBUM;
+    current_artist_ = artist;
+    current_album_.clear();
+    lv_obj_t* back = lv_list_add_btn(list_, LV_SYMBOL_LEFT, "返回");
+    ui_theme::apply_list_menu_item(back);
+    lv_obj_add_event_cb(back, on_album_item_clicked, LV_EVENT_CLICKED, this);
+    auto it = category_.find(artist);
+    if (it != category_.end()) {
+        for (const auto& kv : it->second) {
+            lv_obj_t* btn = lv_list_add_btn(list_, LV_SYMBOL_DIRECTORY, kv.first.c_str());
+            ui_theme::apply_list_menu_item(btn);
+            lv_obj_add_event_cb(btn, on_album_item_clicked, LV_EVENT_CLICKED, this);
+        }
+    }
+    rebuildFocusGroup();
+}
+
+void AppMusic::populateTrackList(const std::string& artist, const std::string& album) {
+    if (!list_) return;
+    lv_obj_clean(list_);
+    list_level_ = LEVEL_TRACK;
+    current_artist_ = artist;
+    current_album_ = album;
+    lv_obj_t* back = lv_list_add_btn(list_, LV_SYMBOL_LEFT, "返回");
+    ui_theme::apply_list_menu_item(back);
+    lv_obj_add_event_cb(back, on_track_item_clicked, LV_EVENT_CLICKED, this);
+    auto ita = category_.find(artist);
+    if (ita == category_.end()) return;
+    auto ita2 = ita->second.find(album);
+    if (ita2 == ita->second.end()) return;
+    for (int idx : ita2->second) {
+        std::string t = extractTitle(names_[idx]);
+        lv_obj_t* btn = lv_list_add_btn(list_, LV_SYMBOL_AUDIO, t.c_str());
+        ui_theme::apply_list_menu_item(btn);
+        lv_obj_add_event_cb(btn, on_track_item_clicked, LV_EVENT_CLICKED, this);
+    }
+    rebuildFocusGroup();
+}
+
+bool AppMusic::is_focusable(lv_obj_t* obj) {
+    if (!lv_obj_is_valid(obj)) return false;
+    if (lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN)) return false;
+    if (lv_obj_has_class(obj, &lv_btn_class)) return true;
+    if (lv_obj_has_class(obj, &lv_slider_class)) return true;
+    if (lv_obj_has_class(obj, &lv_textarea_class)) return true;
+    if (lv_obj_has_class(obj, &lv_dropdown_class)) return true;
+    if (lv_obj_is_editable(obj)) return true;
+    return false;
+}
+
+void AppMusic::add_focusables_recursive(lv_obj_t* node, lv_group_t* group) {
+    if (!node || !group) return;
+    if (is_focusable(node)) lv_group_add_obj(group, node);
+    uint32_t n = lv_obj_get_child_cnt(node);
+    for (uint32_t i = 0; i < n; ++i) {
+        lv_obj_t* child = lv_obj_get_child(node, i);
+        add_focusables_recursive(child, group);
+    }
+}
+
+void AppMusic::rebuildFocusGroup() {
+    lv_indev_t* indev = kb_get_indev();
+    if (!indev || !root_) return;
+    lv_group_t* group = kb_get_group();
+    if (!group) return;
+    lv_group_remove_all_objs(group);
+    add_focusables_recursive(root_, group);
+    lv_indev_set_group(indev, group);
+    if (list_ && lv_obj_get_child_cnt(list_) > 0) {
+        lv_obj_t* first = lv_obj_get_child(list_, 0);
+        if (first) lv_group_focus_obj(first);
+    }
+}
+
+void AppMusic::playTrackByTitle(const char* title) {
+    if (!title) return;
+    auto ita = category_.find(current_artist_);
+    if (ita == category_.end()) return;
+    auto ita2 = ita->second.find(current_album_);
+    if (ita2 == ita->second.end()) return;
+    for (int idx : ita2->second) {
+        std::string a, b, t;
+        if (!parseNameParts(names_[idx], a, b, t)) t = stripExtension(names_[idx]);
+        if (t == title) { playIndex(idx); return; }
+    }
 }
 
 void AppMusic::playByName(const char* name) {
@@ -263,6 +404,45 @@ void AppMusic::on_list_item_clicked(lv_event_t* e) {
     const char* text = lv_list_get_btn_text(app->list_, btn);
     if (text) {
         app->playByName(text);
+    }
+}
+
+void AppMusic::on_artist_item_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppMusic*>(lv_event_get_user_data(e));
+    if (!app || lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    lv_obj_t* btn = lv_event_get_target(e);
+    if (!btn) return;
+    const char* text = lv_list_get_btn_text(app->list_, btn);
+    if (!text) return;
+    std::string s(text);
+    app->populateAlbumList(s);
+}
+
+void AppMusic::on_album_item_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppMusic*>(lv_event_get_user_data(e));
+    if (!app || lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    lv_obj_t* btn = lv_event_get_target(e);
+    if (!btn) return;
+    const char* text = lv_list_get_btn_text(app->list_, btn);
+    if (!text) return;
+    std::string s(text);
+    if (s == "返回") { app->populateArtistList(); return; }
+    app->populateTrackList(app->current_artist_, s);
+}
+
+void AppMusic::on_track_item_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppMusic*>(lv_event_get_user_data(e));
+    if (!app || lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    lv_obj_t* btn = lv_event_get_target(e);
+    if (!btn) return;
+    const char* text = lv_list_get_btn_text(app->list_, btn);
+    if (!text) return;
+    std::string s(text);
+    if (s == "返回") { app->populateAlbumList(app->current_artist_); return; }
+    app->playTrackByTitle(s.c_str());
+    if (app->track_name_) {
+        std::string label = std::string("Track: ") + s;
+        lv_label_set_text(app->track_name_, label.c_str());
     }
 }
 
