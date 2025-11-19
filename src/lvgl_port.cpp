@@ -20,9 +20,9 @@ void lvgl_setup() {
     lv_init();
 
     static lv_disp_draw_buf_t draw_buf;
-    static lv_color_t buf1[240 * 5];
-    static lv_color_t buf2[240 * 5];
-    lv_disp_draw_buf_init(&draw_buf, buf1, buf2, 240 * 5);
+    static lv_color_t buf1[240 * 30];
+    static lv_color_t buf2[240 * 30];
+    lv_disp_draw_buf_init(&draw_buf, buf1, buf2, 240 * 30);
 
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init(&disp_drv);
