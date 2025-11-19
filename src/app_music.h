@@ -84,6 +84,11 @@ private:
     lv_obj_t* track_name_ = nullptr;
     lv_obj_t* back_btn_ = nullptr;
     lv_obj_t* player_volume_ = nullptr;
+    lv_obj_t* content_col_ = nullptr;
+    lv_obj_t* control_col_ = nullptr;
+    lv_obj_t* lyric_prev_ = nullptr;
+    lv_obj_t* lyric_curr_ = nullptr;
+    lv_obj_t* lyric_next_ = nullptr;
 
     // View state
     bool in_player_mode_ = false;
@@ -98,6 +103,14 @@ private:
     std::map<std::string, std::map<std::string, std::vector<int>>> category_;
     int current_index_ = -1;
     bool is_playing_ = false;
+    struct LyricLine { uint32_t t; std::string s; };
+    std::vector<LyricLine> lyrics_;
+    int lyric_index_ = -1;
+    uint32_t lyric_start_ms_ = 0;
+    uint32_t lyric_pause_accum_ms_ = 0;
+    uint32_t lyric_pause_start_ms_ = 0;
+    bool lyric_initialized_ = false;
+    int lyric_track_index_ = -1;
 
     // SD manager for proper SPI pin setup
     SDFileManager sd_;
@@ -163,6 +176,11 @@ private:
     static std::string stripExtension(const std::string& s);
     static bool parseNameParts(const std::string& base, std::string& artist, std::string& album, std::string& title);
     static std::string extractTitle(const std::string& base);
+    static std::string replaceExtension(const std::string& path, const char* newExt);
+    static uint32_t parse_lrc_timestamp(const char* p, size_t len);
+    void loadLyricsForPath(const std::string& mp3_path);
+    void clearLyrics();
+    void updateLyrics(uint32_t elapsed_ms);
 
     // Playback
     void playIndex(int idx);

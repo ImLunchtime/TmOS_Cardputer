@@ -198,7 +198,7 @@ void WindowSystem::update() {
     if (!stack_.empty()) {
         IApp* app = stack_.back().app.get();
         if (app && !app->isLauncher()) {
-            if (M5Cardputer.BtnA.wasPressed()) {
+            if (kb_consume_exit_requested()) {
                 closeTop();
             }
         }

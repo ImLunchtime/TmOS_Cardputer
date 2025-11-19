@@ -7,6 +7,7 @@ static lv_group_t *kb_group = nullptr;
 static std::vector<uint16_t> key_queue;
 static uint16_t current_key = 0;
 static bool emit_release_next = false;
+static volatile bool g_exit_requested = false;
 
 static void keyboard_read(lv_indev_drv_t * drv, lv_indev_data_t * data) {
     (void)drv;
@@ -60,16 +61,21 @@ void kb_process_hardware_keys() {
             for (auto c : status.word) {
                 // Skip TAB character to avoid duplicate LV_KEY_NEXT events
                 if (c == '\t') continue;
-                if (status.fn) {
-                    if (c == ';')       key_queue.push_back(LV_KEY_PREV);
-                    else if (c == '.')  key_queue.push_back(LV_KEY_NEXT);
-                    else if (c == ',')  key_queue.push_back(LV_KEY_LEFT);
-                    else if (c == '/')  key_queue.push_back(LV_KEY_RIGHT);
-                    else                 key_queue.push_back(static_cast<uint8_t>(c));
-                } else {
-                    key_queue.push_back(static_cast<uint8_t>(c));
-                }
+                // Map punctuation to navigation keys regardless of FN state
+                if (c == ';')       { key_queue.push_back(LV_KEY_PREV);  continue; }
+                if (c == ',')       { key_queue.push_back(LV_KEY_LEFT);  continue; }
+                if (c == '.')       { key_queue.push_back(LV_KEY_NEXT);  continue; }
+                if (c == '/')       { key_queue.push_back(LV_KEY_RIGHT); continue; }
+                if (c == '`')       { g_exit_requested = true;            continue; }
+                // Default: enqueue ASCII character for text input
+                key_queue.push_back(static_cast<uint8_t>(c));
             }
         }
     }
+}
+
+bool kb_consume_exit_requested() {
+    bool r = g_exit_requested;
+    g_exit_requested = false;
+    return r;
 }

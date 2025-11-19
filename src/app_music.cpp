@@ -1,5 +1,6 @@
 #include "app_music.h"
 #include "theme.h"
+#include <algorithm>
 #include "input_kb.h"
 #include <SD.h>
 #include <cstring>
@@ -125,30 +126,87 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_size(player_view_, lv_pct(100), lv_pct(100));
     lv_obj_set_flex_grow(player_view_, 1);
     lv_obj_set_flex_flow(player_view_, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_style_pad_all(player_view_, 6, 0);
-    lv_obj_set_style_pad_row(player_view_, 6, 0);
+    lv_obj_set_style_pad_all(player_view_, 2, 0);
+    lv_obj_set_style_pad_row(player_view_, 2, 0);
     lv_obj_add_flag(player_view_, LV_OBJ_FLAG_HIDDEN);
 
-    // Track name in player view
-    track_name_ = lv_label_create(player_view_);
+    content_col_ = lv_obj_create(player_view_);
+    lv_obj_set_flex_grow(content_col_, 1);
+    lv_obj_set_style_pad_all(content_col_, 2, 0);
+    lv_obj_set_style_pad_row(content_col_, 0, 0);
+    lv_obj_set_flex_flow(content_col_, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_height(content_col_, LV_SIZE_CONTENT);
+    lv_obj_set_style_border_width(content_col_, 0, 0);
+    lv_obj_set_style_border_opa(content_col_, LV_OPA_TRANSP, 0);
+
+    control_col_ = lv_obj_create(player_view_);
+    lv_obj_set_width(control_col_, lv_pct(100));
+    lv_obj_set_style_pad_all(control_col_, 2, 0);
+    lv_obj_set_style_pad_row(control_col_, 4, 0);
+    lv_obj_set_style_pad_top(control_col_, 0, 0);
+    lv_obj_set_style_pad_bottom(control_col_, 0, 0);
+    lv_obj_set_flex_flow(control_col_, LV_FLEX_FLOW_ROW);
+    lv_obj_set_height(control_col_, 18);
+    lv_obj_set_style_border_width(control_col_, 0, 0);
+    lv_obj_set_style_border_opa(control_col_, LV_OPA_TRANSP, 0);
+    lv_obj_move_to_index(control_col_, 0);
+
+    track_name_ = lv_label_create(content_col_);
     lv_label_set_text(track_name_, "Track: -");
     lv_label_set_long_mode(track_name_, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_style_text_line_space(track_name_, 0, 0);
+    lv_obj_set_style_min_height(track_name_, 8, 0);
+    lyric_prev_ = lv_label_create(content_col_);
+    lv_label_set_text(lyric_prev_, "");
+    lv_obj_set_style_text_align(lyric_prev_, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_pad_ver(lyric_prev_, 0, 0);
+    lv_obj_set_style_text_line_space(lyric_prev_, 0, 0);
+    lv_obj_set_style_min_height(lyric_prev_, 8, 0);
+    lv_label_set_long_mode(lyric_prev_, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_width(lyric_prev_, lv_pct(100));
+    lv_obj_set_style_text_color(lyric_prev_, lv_color_hex(0x000000), 0);
+    ui_theme::apply_small_text_recursive(lyric_prev_);
+    lyric_curr_ = lv_label_create(content_col_);
+    lv_label_set_text(lyric_curr_, "");
+    lv_obj_set_style_text_align(lyric_curr_, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_pad_ver(lyric_curr_, 0, 0);
+    lv_obj_set_style_text_line_space(lyric_curr_, 0, 0);
+    lv_obj_set_style_min_height(lyric_curr_, 8, 0);
+    lv_label_set_long_mode(lyric_curr_, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_width(lyric_curr_, lv_pct(100));
+    ui_theme::apply_small_text_recursive(lyric_curr_);
+    lv_obj_set_style_text_color(lyric_curr_, lv_color_hex(0x000000), 0);
+    lyric_next_ = lv_label_create(content_col_);
+    lv_label_set_text(lyric_next_, "");
+    lv_obj_set_style_text_align(lyric_next_, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_pad_ver(lyric_next_, 0, 0);
+    lv_obj_set_style_text_line_space(lyric_next_, 0, 0);
+    lv_obj_set_style_min_height(lyric_next_, 8, 0);
+    lv_label_set_long_mode(lyric_next_, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_width(lyric_next_, lv_pct(100));
+    lv_obj_set_style_text_color(lyric_next_, lv_color_hex(0x000000), 0);
+    ui_theme::apply_small_text_recursive(lyric_next_);
 
-    // Volume slider in player view (full width)
-    player_volume_ = lv_slider_create(player_view_);
-    lv_obj_set_width(player_volume_, lv_pct(100));
+    // Back button first (left), then slider (right)
+    back_btn_ = lv_btn_create(control_col_);
+    lv_obj_set_size(back_btn_, 16, 14);
+    lv_obj_set_style_bg_opa(back_btn_, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(back_btn_, 0, 0);
+    lv_obj_set_style_shadow_opa(back_btn_, LV_OPA_TRANSP, 0);
+    lv_obj_t* back_label = lv_label_create(back_btn_);
+    lv_label_set_text(back_label, LV_SYMBOL_LEFT);
+    lv_obj_set_style_text_color(back_label, lv_color_hex(0x000000), 0);
+    lv_obj_center(back_label);
+    lv_obj_add_flag(back_btn_, LV_OBJ_FLAG_CLICK_FOCUSABLE);
+    lv_obj_add_event_cb(back_btn_, on_back_btn_clicked, LV_EVENT_CLICKED, this);
+
+    player_volume_ = lv_slider_create(control_col_);
+    lv_obj_set_flex_grow(player_volume_, 1);
+    lv_obj_set_height(player_volume_, 8);
     lv_slider_set_range(player_volume_, 0, 10);
-    lv_slider_set_value(player_volume_, 1, LV_ANIM_OFF);
     lv_obj_add_event_cb(player_volume_, on_player_volume_event, LV_EVENT_VALUE_CHANGED, this);
 
-    // Back button in player view (full width for easy tap)
-    back_btn_ = lv_btn_create(player_view_);
-    lv_obj_set_width(back_btn_, lv_pct(100));
-    lv_obj_t* back_label = lv_label_create(back_btn_);
-    lv_label_set_text(back_label, "Back");
-    lv_obj_center(back_label);
-    ui_theme::apply_button(back_btn_);
-    lv_obj_add_event_cb(back_btn_, on_back_btn_clicked, LV_EVENT_CLICKED, this);
+    // Removed old back button in content_col_
 }
 
 void AppMusic::updateStatus(const char* text) {
@@ -386,7 +444,17 @@ void AppMusic::on_player_volume_event(lv_event_t* e) {
 void AppMusic::playIndex(int idx) {
     if (idx < 0 || idx >= (int)paths_.size()) return;
     current_index_ = idx;
-    switchToPlayerView(names_[idx].c_str()); // Switch to player view
+    {
+        std::string t = extractTitle(names_[idx]);
+        switchToPlayerView(t.c_str());
+    }
+    loadLyricsForPath(paths_[idx]);
+    lyric_index_ = -1;
+    lyric_pause_accum_ms_ = 0;
+    lyric_pause_start_ms_ = 0;
+    lyric_initialized_ = false;
+    lyric_track_index_ = idx;
+    updateLyrics(0);
     sendAudioCommand(AUDIO_CMD_PLAY, 0, paths_[idx].c_str());
 }
 
@@ -698,9 +766,30 @@ void AppMusic::updateUIFromAudioStatus() {
         if (audioStatus_.isPlaying && strlen(audioStatus_.currentSongName) > 0) {
             updateNowPlaying(audioStatus_.currentSongName);
             updateStatus("Playing");
+            if (!lyric_initialized_ && audioStatus_.currentFileIndex == lyric_track_index_) {
+                lyric_start_ms_ = millis();
+                lyric_initialized_ = true;
+                lyric_pause_accum_ms_ = 0;
+                lyric_pause_start_ms_ = 0;
+            }
+            if (lyric_pause_start_ms_ != 0) {
+                lyric_pause_accum_ms_ += millis() - lyric_pause_start_ms_;
+                lyric_pause_start_ms_ = 0;
+            }
+            uint32_t elapsed = 0;
+            if (lyric_initialized_) {
+                uint32_t now = millis();
+                if (now >= lyric_start_ms_) elapsed = now - lyric_start_ms_;
+                if (elapsed >= lyric_pause_accum_ms_) elapsed -= lyric_pause_accum_ms_;
+                else elapsed = 0;
+            }
+            updateLyrics(elapsed);
         } else if (audioStatus_.isPaused) {
             updateNowPlaying("Paused");
             updateStatus("Paused");
+            if (lyric_pause_start_ms_ == 0) {
+                lyric_pause_start_ms_ = millis();
+            }
         } else {
             updateNowPlaying("-");
         }
@@ -710,6 +799,87 @@ void AppMusic::updateUIFromAudioStatus() {
         }
         xSemaphoreGive(audioStatusMutex_);
     }
+}
+
+std::string AppMusic::replaceExtension(const std::string& path, const char* newExt) {
+    size_t p = path.find_last_of('.');
+    if (p == std::string::npos) return path + newExt;
+    return path.substr(0, p) + newExt;
+}
+
+uint32_t AppMusic::parse_lrc_timestamp(const char* p, size_t len) {
+    int mm = 0, ss = 0, xx = 0;
+    const char* end = p + len;
+    const char* c = p;
+    while (c < end && *c >= '0' && *c <= '9') { mm = mm * 10 + (*c - '0'); c++; }
+    if (c < end && (*c == ':' || *c == '.')) c++;
+    while (c < end && *c >= '0' && *c <= '9') { ss = ss * 10 + (*c - '0'); c++; }
+    if (c < end && (*c == '.' || *c == ':')) c++;
+    while (c < end && *c >= '0' && *c <= '9') { xx = xx * 10 + (*c - '0'); c++; }
+    return (uint32_t)mm * 60000u + (uint32_t)ss * 1000u + (uint32_t)xx;
+}
+
+void AppMusic::clearLyrics() {
+    lyrics_.clear();
+    lyric_index_ = -1;
+    if (lyric_prev_) lv_label_set_text(lyric_prev_, "");
+    if (lyric_curr_) lv_label_set_text(lyric_curr_, "");
+    if (lyric_next_) lv_label_set_text(lyric_next_, "");
+}
+
+void AppMusic::loadLyricsForPath(const std::string& mp3_path) {
+    clearLyrics();
+    std::string lrc = replaceExtension(mp3_path, ".lrc");
+    File f = SD.open(lrc.c_str());
+    if (!f) return;
+    while (f.available()) {
+        String line = f.readStringUntil('\n');
+        line.trim();
+        if (line.length() == 0) continue;
+        std::string s = std::string(line.c_str());
+        size_t pos = 0;
+        std::vector<uint32_t> times;
+        while (true) {
+            size_t lb = s.find('[', pos);
+            if (lb == std::string::npos) break;
+            size_t rb = s.find(']', lb + 1);
+            if (rb == std::string::npos) break;
+            uint32_t t = parse_lrc_timestamp(s.c_str() + lb + 1, rb - lb - 1);
+            times.push_back(t);
+            pos = rb + 1;
+        }
+        size_t last_rb = s.rfind(']');
+        std::string text = last_rb != std::string::npos ? s.substr(last_rb + 1) : s;
+        if (text.size() == 0) continue;
+        for (auto t : times) {
+            lyrics_.push_back({t, text});
+        }
+    }
+    f.close();
+    if (!lyrics_.empty()) {
+        std::sort(lyrics_.begin(), lyrics_.end(), [](const LyricLine& a, const LyricLine& b){ return a.t < b.t; });
+    }
+}
+
+void AppMusic::updateLyrics(uint32_t elapsed_ms) {
+    if (lyrics_.empty()) return;
+    int idx = lyric_index_;
+    if (idx < 0 || (size_t)idx >= lyrics_.size() || elapsed_ms < lyrics_[idx].t || (idx + 1 < (int)lyrics_.size() && elapsed_ms >= lyrics_[idx + 1].t)) {
+        int lo = 0, hi = (int)lyrics_.size() - 1, ans = 0;
+        while (lo <= hi) {
+            int mid = (lo + hi) / 2;
+            if (lyrics_[mid].t <= elapsed_ms) { ans = mid; lo = mid + 1; }
+            else { hi = mid - 1; }
+        }
+        idx = ans;
+        lyric_index_ = idx;
+    }
+    const char* prev = idx > 0 ? lyrics_[idx - 1].s.c_str() : "";
+    const char* curr = lyrics_[idx].s.c_str();
+    const char* next = (idx + 1 < (int)lyrics_.size()) ? lyrics_[idx + 1].s.c_str() : "";
+    if (lyric_prev_) lv_label_set_text(lyric_prev_, prev);
+    if (lyric_curr_) lv_label_set_text(lyric_curr_, curr);
+    if (lyric_next_) lv_label_set_text(lyric_next_, next);
 }
 
 void AppMusic::handleNextPrevRequests() {
@@ -739,6 +909,13 @@ void AppMusic::playNextSong() {
     int next = current_index_ >= 0 ? (current_index_ + 1) % (int)paths_.size() : 0;
     current_index_ = next;
     updateNowPlaying(names_[next].c_str());
+    loadLyricsForPath(paths_[next]);
+    lyric_index_ = -1;
+    lyric_pause_accum_ms_ = 0;
+    lyric_pause_start_ms_ = 0;
+    lyric_initialized_ = false;
+    lyric_track_index_ = next;
+    updateLyrics(0);
     sendAudioCommand(AUDIO_CMD_PLAY, 0, paths_[next].c_str());
 }
 
@@ -747,5 +924,12 @@ void AppMusic::playPreviousSong() {
     int prev = current_index_ >= 0 ? (current_index_ - 1 + (int)paths_.size()) % (int)paths_.size() : 0;
     current_index_ = prev;
     updateNowPlaying(names_[prev].c_str());
+    loadLyricsForPath(paths_[prev]);
+    lyric_index_ = -1;
+    lyric_pause_accum_ms_ = 0;
+    lyric_pause_start_ms_ = 0;
+    lyric_initialized_ = false;
+    lyric_track_index_ = prev;
+    updateLyrics(0);
     sendAudioCommand(AUDIO_CMD_PLAY, 0, paths_[prev].c_str());
 }
