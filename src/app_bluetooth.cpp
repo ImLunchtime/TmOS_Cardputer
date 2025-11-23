@@ -8,10 +8,16 @@ public:
         if (!AppBluetooth::s_instance_) return;
         AppBluetooth::s_instance_->enqueue_event(1);
     }
+    void onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) override {
+        if (!AppBluetooth::s_instance_ || !desc) return;
+        NimBLEAddress addr(desc->peer_ota_addr);
+        AppBluetooth::s_instance_->enqueue_event(1, addr.toString().c_str());
+    }
     void onDisconnect(NimBLEServer* pServer) override {
         if (!AppBluetooth::s_instance_) return;
         AppBluetooth::s_instance_->enqueue_event(2);
     }
+    
 } s_server_callbacks;
 
 AppBluetooth* AppBluetooth::s_instance_ = nullptr;
@@ -22,15 +28,16 @@ AppBluetooth::~AppBluetooth() {}
 void AppBluetooth::onOpen(lv_obj_t* window_root) {
     root_ = window_root;
     lv_obj_set_flex_flow(root_, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_style_pad_all(root_, 10, 0);
-    lv_obj_set_style_pad_row(root_, 8, 0);
+    lv_obj_set_style_pad_all(root_, 6, 0);
+    lv_obj_set_style_pad_row(root_, 4, 0);
+    ui_theme::apply_small_text_recursive(root_);
 
     label_name_ = lv_label_create(root_);
     lv_label_set_text(label_name_, "Device Name");
     lv_obj_set_style_text_font(label_name_, ui_theme::get_system_font(), 0);
 
     ta_name_ = lv_textarea_create(root_);
-    lv_obj_set_width(ta_name_, lv_pct(90));
+    lv_obj_set_width(ta_name_, lv_pct(85));
     lv_textarea_set_one_line(ta_name_, true);
     lv_textarea_set_placeholder_text(ta_name_, "Cardputer");
     lv_obj_set_style_text_font(ta_name_, ui_theme::get_system_font(), 0);
@@ -45,6 +52,10 @@ void AppBluetooth::onOpen(lv_obj_t* window_root) {
     label_status_ = lv_label_create(root_);
     lv_label_set_text(label_status_, "Stopped");
     lv_obj_set_style_text_font(label_status_, ui_theme::get_system_font(), 0);
+
+    label_peer_ = lv_label_create(root_);
+    lv_label_set_text(label_peer_, "Peer: -");
+    lv_obj_set_style_text_font(label_peer_, ui_theme::get_system_font(), 0);
 
     event_queue_ = xQueueCreate(8, sizeof(BleEvent));
     s_instance_ = this;
@@ -73,6 +84,19 @@ void AppBluetooth::onTick() {
         if (label_status_) {
             if (ev.type == 1) lv_label_set_text(label_status_, "Connected");
             else if (ev.type == 2) lv_label_set_text(label_status_, "Waiting for connection");
+        }
+        if (label_peer_) {
+            if (ev.type == 1) {
+                if (ev.peer[0]) {
+                    char buf[64];
+                    snprintf(buf, sizeof(buf), "Peer: %s", ev.peer);
+                    lv_label_set_text(label_peer_, buf);
+                } else {
+                    lv_label_set_text(label_peer_, "Peer: connected");
+                }
+            } else if (ev.type == 2) {
+                lv_label_set_text(label_peer_, "Peer: -");
+            }
         }
     }
 }
@@ -115,6 +139,7 @@ void AppBluetooth::stop_ble() {
     advertising_ = false;
     update_ui_running(false);
     if (label_status_) lv_label_set_text(label_status_, "Stopped");
+    if (label_peer_) lv_label_set_text(label_peer_, "Peer: -");
 }
 
 void AppBluetooth::on_btn_event(lv_event_t* e) {
@@ -132,6 +157,19 @@ void AppBluetooth::on_btn_event(lv_event_t* e) {
 void AppBluetooth::enqueue_event(int type) {
     if (!event_queue_) return;
     BleEvent ev; ev.type = type;
+    ev.peer[0] = '\0';
+    xQueueSend(event_queue_, &ev, 0);
+}
+
+void AppBluetooth::enqueue_event(int type, const char* peer) {
+    if (!event_queue_) return;
+    BleEvent ev; ev.type = type;
+    if (peer) {
+        strncpy(ev.peer, peer, sizeof(ev.peer)-1);
+        ev.peer[sizeof(ev.peer)-1] = '\0';
+    } else {
+        ev.peer[0] = '\0';
+    }
     xQueueSend(event_queue_, &ev, 0);
 }
 
