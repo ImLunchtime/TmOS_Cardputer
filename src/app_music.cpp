@@ -138,6 +138,7 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_height(content_col_, LV_SIZE_CONTENT);
     lv_obj_set_style_border_width(content_col_, 0, 0);
     lv_obj_set_style_border_opa(content_col_, LV_OPA_TRANSP, 0);
+    lv_obj_set_width(content_col_, lv_pct(100));
 
     control_col_ = lv_obj_create(player_view_);
     lv_obj_set_width(control_col_, lv_pct(100));
