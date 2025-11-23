@@ -10,11 +10,13 @@ void AppDevices::onOpen(lv_obj_t* window_root) {
     lv_obj_set_flex_flow(root_, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_all(root_, 6, 0);
     lv_obj_set_style_pad_row(root_, 6, 0);
+    lv_obj_set_style_text_font(root_, ui_theme::get_system_font(), 0);
 
     list_ = lv_list_create(root_);
     lv_obj_set_size(list_, lv_pct(100), lv_pct(100));
     lv_obj_set_flex_grow(list_, 1);
     ui_theme::apply_list_menu(list_);
+    lv_obj_set_style_text_font(list_, ui_theme::get_system_font(), 0);
 
     event_queue_ = xQueueCreate(8, sizeof(DeviceEvent));
     s_instance_ = this;
@@ -54,6 +56,7 @@ void AppDevices::handle_event(const DeviceEvent& ev) {
         names_.emplace_back(ev.name);
         lv_obj_t* item = lv_list_add_btn(list_, NULL, ev.name);
         ui_theme::apply_small_text_recursive(item);
+        lv_obj_set_style_text_font(item, ui_theme::get_system_font(), 0);
         lv_obj_set_style_min_height(item, 14, 0);
         lv_obj_set_style_pad_top(item, 1, 0);
         lv_obj_set_style_pad_bottom(item, 1, 0);
