@@ -2,20 +2,6 @@
 #include <M5Cardputer.h>
 #include <lvgl.h>
 
-static void lv_tick_task(void *arg) {
-    while (1) {
-        lv_tick_inc(2);
-        vTaskDelay(pdMS_TO_TICKS(5));
-    }
-}
-
-static void lvgl_task(void *arg) {
-    while (1) {
-        lv_timer_handler();
-        vTaskDelay(pdMS_TO_TICKS(5));
-    }
-}
-
 void lvgl_setup() {
     lv_init();
 
@@ -39,9 +25,4 @@ void lvgl_setup() {
     disp_drv.ver_res = 135;
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register(&disp_drv);
-}
-
-void start_lvgl_tasks() {
-    xTaskCreatePinnedToCore(lv_tick_task, "lv_tick_task", 4096, NULL, 1, NULL, 1);
-    xTaskCreatePinnedToCore(lvgl_task, "lvgl_task", 8192, NULL, 1, NULL, 1);
 }

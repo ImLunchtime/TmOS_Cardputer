@@ -10,21 +10,13 @@
 #include "app_music.h"
 #include "app_theme_center.h"
 #include "app_settings.h"
-#include "app_test_iapp.h"
+#include "app_test.h"
 #include "theme.h"
 LV_IMG_DECLARE(icon_music_sd);
 LV_IMG_DECLARE(icon_theme);
 LV_IMG_DECLARE(icon_test);
 
-static lv_obj_t* find_img_child(lv_obj_t* parent) {
-    if (!parent) return nullptr;
-    uint32_t n = lv_obj_get_child_cnt(parent);
-    for (uint32_t i = 0; i < n; ++i) {
-        lv_obj_t* c = lv_obj_get_child(parent, i);
-        if (lv_obj_has_class(c, &lv_img_class)) return c;
-    }
-    return nullptr;
-}
+ 
 
 static void on_music_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
