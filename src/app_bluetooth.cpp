@@ -51,6 +51,7 @@ void AppBluetooth::onOpen(lv_obj_t* window_root) {
 
     if (!initialized_) {
         NimBLEDevice::init("Cardputer");
+        NimBLEDevice::setPower(ESP_PWR_LVL_P9);
         server_ = NimBLEDevice::createServer();
         server_->setCallbacks(&s_server_callbacks);
         service_ = server_->createService("f3bce0f0-0000-4a5f-bad4-12345678abcd");
@@ -59,7 +60,6 @@ void AppBluetooth::onOpen(lv_obj_t* window_root) {
         service_->start();
         NimBLEAdvertising* adv = NimBLEDevice::getAdvertising();
         if (adv) {
-            adv->addServiceUUID(service_->getUUID());
             adv->setScanResponse(true);
         }
         initialized_ = true;
@@ -94,6 +94,15 @@ void AppBluetooth::start_ble(const char* name) {
     NimBLEAdvertising* adv = NimBLEDevice::getAdvertising();
     if (!adv) return;
     adv->stop();
+    NimBLEAdvertisementData advData;
+    NimBLEAdvertisementData scanData;
+    const char* nm = (name && *name) ? name : "Cardputer";
+    advData.setFlags(0x06);
+    advData.setName(nm);
+    scanData.setName(nm);
+    adv->setAdvertisementData(advData);
+    adv->setScanResponseData(scanData);
+    adv->setScanResponse(true);
     adv->start();
     advertising_ = true;
     update_ui_running(true);
