@@ -2,19 +2,23 @@
  * @Author: ImLunchtime knoxmedia@yeah.net
  * @Date: 2025-11-08 18:13:39
  * @LastEditors: ImLunchtime knoxmedia@yeah.net
- * @LastEditTime: 2025-11-20 14:52:02
+ * @LastEditTime: 2025-11-23 17:04:11
  * @FilePath: \CardputerOS2_LVGL\src\app_launcher.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 #include "app_launcher.h"
 #include "app_music.h"
 #include "app_theme_center.h"
+#include "app_devices.h"
+#include "app_bluetooth.h"
 #include "app_settings.h"
 #include "app_test.h"
 #include "theme.h"
 LV_IMG_DECLARE(icon_music_sd);
 LV_IMG_DECLARE(icon_theme);
 LV_IMG_DECLARE(icon_test);
+LV_IMG_DECLARE(icon_devices);
+LV_IMG_DECLARE(icon_bluetooth);
 
  
 
@@ -42,6 +46,18 @@ static void on_test_item_event(lv_event_t* e) {
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchTest();
 }
 
+static void on_devices_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchDevices();
+}
+
+static void on_bluetooth_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchBluetooth();
+}
+
 void AppLauncher::onOpen(lv_obj_t* window_root) {
     root_ = window_root;
     lv_obj_set_flex_flow(root_, LV_FLEX_FLOW_COLUMN);
@@ -59,7 +75,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_radius(grid_, 0, 0);
     lv_obj_set_style_bg_opa(grid_, LV_OPA_TRANSP, 0);
     static lv_coord_t col_dsc[] = {48, 48, 48, 48, 48, 48, LV_GRID_TEMPLATE_LAST};
-    static lv_coord_t row_dsc[] = {48, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {48, 48, LV_GRID_TEMPLATE_LAST};
     lv_obj_set_grid_dsc_array(grid_, col_dsc, row_dsc);
 
     lv_obj_t* btn_music = lv_btn_create(grid_);
@@ -122,9 +138,40 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
         lv_obj_center(label);
     }
 
+    lv_obj_t* btn_devices = lv_btn_create(grid_);
+    lv_obj_set_size(btn_devices, 48, 48);
+    lv_obj_set_style_bg_opa(btn_devices, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_devices, 0, 0);
+    lv_obj_set_style_radius(btn_devices, 0, 0);
+    lv_obj_set_style_shadow_width(btn_devices, 0, 0);
+    lv_obj_set_style_outline_width(btn_devices, 0, 0);
+    lv_obj_set_grid_cell(btn_devices, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+    lv_obj_add_event_cb(btn_devices, on_devices_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* img = lv_img_create(btn_devices);
+        lv_img_set_src(img, &icon_devices);
+        lv_obj_center(img);
+    }
+
+    lv_obj_t* btn_bluetooth = lv_btn_create(grid_);
+    lv_obj_set_size(btn_bluetooth, 48, 48);
+    lv_obj_set_style_bg_opa(btn_bluetooth, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_bluetooth, 0, 0);
+    lv_obj_set_style_radius(btn_bluetooth, 0, 0);
+    lv_obj_set_style_shadow_width(btn_bluetooth, 0, 0);
+    lv_obj_set_style_outline_width(btn_bluetooth, 0, 0);
+    lv_obj_set_grid_cell(btn_bluetooth, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+    lv_obj_add_event_cb(btn_bluetooth, on_bluetooth_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* img = lv_img_create(btn_bluetooth);
+        lv_img_set_src(img, &icon_bluetooth);
+        lv_obj_center(img);
+    }
 }
 
 void AppLauncher::launchMusic() { wm_.openApp(std::unique_ptr<IApp>(new AppMusic())); }
 void AppLauncher::launchThemeCenter() { wm_.openApp(std::unique_ptr<IApp>(new AppThemeCenter())); }
 void AppLauncher::launchSettings() { wm_.openApp(std::unique_ptr<IApp>(new AppSettings())); }
 void AppLauncher::launchTest() { wm_.openApp(std::unique_ptr<IApp>(new AppTest())); }
+void AppLauncher::launchDevices() { wm_.openApp(std::unique_ptr<IApp>(new AppDevices())); }
+void AppLauncher::launchBluetooth() { wm_.openApp(std::unique_ptr<IApp>(new AppBluetooth())); }

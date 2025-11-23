@@ -26,6 +26,8 @@ public:
     void launchThemeCenter();
     void launchSettings();
     void launchTest();
+    void launchDevices();
+    void launchBluetooth();
 
 private:
     WindowSystem& wm_;
