@@ -9,6 +9,7 @@
 #include "app_launcher.h"
 #include "app_music.h"
 #include "app_theme_center.h"
+#include "app_pictures.h"
 #include "app_devices.h"
 #include "app_bluetooth.h"
 #include "app_settings.h"
@@ -19,6 +20,7 @@ LV_IMG_DECLARE(icon_theme);
 LV_IMG_DECLARE(icon_test);
 LV_IMG_DECLARE(icon_devices);
 LV_IMG_DECLARE(icon_bluetooth);
+LV_IMG_DECLARE(icon_pictures);
 
  
 
@@ -56,6 +58,12 @@ static void on_bluetooth_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
     if (!launcher) return;
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchBluetooth();
+}
+
+static void on_pictures_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchPictures();
 }
 
 void AppLauncher::onOpen(lv_obj_t* window_root) {
@@ -167,6 +175,21 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
         lv_img_set_src(img, &icon_bluetooth);
         lv_obj_center(img);
     }
+
+    lv_obj_t* btn_pictures = lv_btn_create(grid_);
+    lv_obj_set_size(btn_pictures, 48, 48);
+    lv_obj_set_style_bg_opa(btn_pictures, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_pictures, 0, 0);
+    lv_obj_set_style_radius(btn_pictures, 0, 0);
+    lv_obj_set_style_shadow_width(btn_pictures, 0, 0);
+    lv_obj_set_style_outline_width(btn_pictures, 0, 0);
+    lv_obj_set_grid_cell(btn_pictures, LV_GRID_ALIGN_CENTER, 2, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+    lv_obj_add_event_cb(btn_pictures, on_pictures_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* img = lv_img_create(btn_pictures);
+        lv_img_set_src(img, &icon_pictures);
+        lv_obj_center(img);
+    }
 }
 
 void AppLauncher::launchMusic() { wm_.openApp(std::unique_ptr<IApp>(new AppMusic())); }
@@ -175,3 +198,4 @@ void AppLauncher::launchSettings() { wm_.openApp(std::unique_ptr<IApp>(new AppSe
 void AppLauncher::launchTest() { wm_.openApp(std::unique_ptr<IApp>(new AppTest())); }
 void AppLauncher::launchDevices() { wm_.openApp(std::unique_ptr<IApp>(new AppDevices())); }
 void AppLauncher::launchBluetooth() { wm_.openApp(std::unique_ptr<IApp>(new AppBluetooth())); }
+void AppLauncher::launchPictures() { wm_.openApp(std::unique_ptr<IApp>(new AppPictures())); }

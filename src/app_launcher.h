@@ -28,6 +28,7 @@ public:
     void launchTest();
     void launchDevices();
     void launchBluetooth();
+    void launchPictures();
 
 private:
     WindowSystem& wm_;
