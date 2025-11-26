@@ -1,6 +1,7 @@
 #include "app_pictures.h"
 #include <lvgl.h>
 #include <M5Cardputer.h>
+#include <cstring>
 
 AppPictures::AppPictures() {}
 AppPictures::~AppPictures() {}
@@ -135,11 +136,16 @@ void AppPictures::show_image(int idx) {
         lv_obj_center(info_label_);
         return;
     }
-    uint16_t* src16 = (uint16_t*)sprite_->getBuffer();
-    for (uint32_t i = 0; i < (uint32_t)(img_dsc_.header.w * img_dsc_.header.h); ++i) {
-        uint16_t c = src16[i];
-        img_buf_[i * 2 + 0] = (uint8_t)(c & 0xFF);
-        img_buf_[i * 2 + 1] = (uint8_t)(c >> 8);
+    {
+        const uint8_t* src = (const uint8_t*)sprite_->getBuffer();
+#if LV_COLOR_16_SWAP
+        std::memcpy(img_buf_, src, img_dsc_.data_size);
+#else
+        for (uint32_t i = 0; i < img_dsc_.data_size; i += 2) {
+            img_buf_[i] = src[i + 1];
+            img_buf_[i + 1] = src[i];
+        }
+#endif
     }
     img_dsc_.data = (const uint8_t*)img_buf_;
 
