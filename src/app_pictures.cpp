@@ -33,18 +33,16 @@ void AppPictures::build_list() {
     list_ = lv_list_create(root_);
     lv_obj_set_size(list_, lv_pct(100), lv_pct(100));
     lv_obj_set_flex_grow(list_, 1);
+    lv_obj_add_flag(list_, LV_OBJ_FLAG_SCROLLABLE);
     ui_theme::apply_list_menu(list_);
 
     item_index_.clear();
     for (size_t i = 0; i < files_.size(); ++i) {
         const auto& f = files_[i];
-        lv_obj_t* item = lv_btn_create(list_);
-        ui_theme::apply_list_menu_item(item);
-        lv_obj_t* label = lv_label_create(item);
-        lv_label_set_text(label, f.name.c_str());
-        lv_obj_center(label);
-        lv_obj_add_event_cb(item, on_item_clicked, LV_EVENT_CLICKED, this);
-        item_index_[item] = (int)i;
+        lv_obj_t* btn = lv_list_add_btn(list_, LV_SYMBOL_IMAGE, f.name.c_str());
+        ui_theme::apply_list_menu_item(btn);
+        lv_obj_add_event_cb(btn, on_item_clicked, LV_EVENT_CLICKED, this);
+        item_index_[btn] = (int)i;
     }
 }
 
@@ -57,11 +55,18 @@ void AppPictures::build_viewer() {
     lv_obj_set_style_radius(viewer_, 0, 0);
 
     back_btn_ = lv_btn_create(viewer_);
-    ui_theme::apply_button(back_btn_);
+    lv_obj_set_size(back_btn_, 24, 24);
+    lv_obj_set_style_radius(back_btn_, 12, 0);
+    lv_obj_set_style_bg_opa(back_btn_, LV_OPA_80, 0);
+    lv_obj_set_style_bg_color(back_btn_, lv_color_hex(0xDDDDDD), 0);
+    lv_obj_set_style_border_width(back_btn_, 0, 0);
+    lv_obj_set_style_shadow_opa(back_btn_, LV_OPA_TRANSP, 0);
     lv_obj_set_pos(back_btn_, 4, 4);
     lv_obj_t* lbl = lv_label_create(back_btn_);
-    lv_label_set_text(lbl, "Back");
+    lv_label_set_text(lbl, LV_SYMBOL_LEFT);
+    lv_obj_set_style_text_color(lbl, lv_color_hex(0x000000), 0);
     lv_obj_center(lbl);
+    lv_obj_add_flag(back_btn_, LV_OBJ_FLAG_CLICK_FOCUSABLE);
     lv_obj_add_event_cb(back_btn_, on_back_clicked, LV_EVENT_CLICKED, this);
 
     img_ = lv_img_create(viewer_);
