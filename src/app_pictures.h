@@ -4,7 +4,6 @@
 #include "SDFileManager.h"
 #include <vector>
 #include <map>
-#include <M5GFX.h>
 
 class AppPictures : public IApp {
 public:
@@ -25,10 +24,9 @@ private:
     lv_obj_t* img_ = nullptr;
     lv_obj_t* back_btn_ = nullptr;
     lv_obj_t* info_label_ = nullptr;
-    LGFX_Sprite* sprite_ = nullptr;
     lv_img_dsc_t img_dsc_{};
-    bool img_ready_ = false;
     uint8_t* img_buf_ = nullptr;
+    
     std::vector<FileInfo> files_;
     std::map<lv_obj_t*, int> item_index_;
     SDFileManager fm_;

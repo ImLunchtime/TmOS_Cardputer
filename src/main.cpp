@@ -1,3 +1,11 @@
+/*
+ * @Author: ImLunchtime knoxmedia@yeah.net
+ * @Date: 2025-11-07 17:10:20
+ * @LastEditors: ImLunchtime knoxmedia@yeah.net
+ * @LastEditTime: 2025-11-26 16:12:42
+ * @FilePath: \CardputerOS2_LVGL\src\main.cpp
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #include <M5Cardputer.h>
 #include <lvgl.h>
 
@@ -22,7 +30,7 @@ void setup() {
     lvgl_setup();
     kb_init();
     ui_theme::init();
-    // Create wallpaper (solid black) behind windows
+    // Create wallpaper behind windows
     ui_theme::create_wallpaper();
     // Drive LVGL from loop() to avoid cross-thread races
 
