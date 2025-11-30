@@ -29,6 +29,7 @@ public:
     void launchDevices();
     void launchBluetooth();
     void launchPictures();
+    void launchCircuitSim();
 
 private:
     WindowSystem& wm_;

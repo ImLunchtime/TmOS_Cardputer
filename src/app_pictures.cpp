@@ -53,6 +53,22 @@ void AppPictures::build_viewer() {
     lv_obj_set_style_bg_opa(viewer_, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(viewer_, 0, 0);
     lv_obj_set_style_radius(viewer_, 0, 0);
+    lv_obj_set_flex_flow(viewer_, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_all(viewer_, 0, 0);
+    lv_obj_set_style_pad_row(viewer_, 0, 0);
+    lv_obj_set_scroll_dir(viewer_, LV_DIR_NONE);
+    lv_obj_clear_flag(viewer_, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_scrollbar_mode(viewer_, LV_SCROLLBAR_MODE_OFF);
+
+    img_area_ = lv_obj_create(viewer_);
+    lv_obj_set_size(img_area_, lv_pct(100), lv_pct(100));
+    lv_obj_set_flex_grow(img_area_, 1);
+    lv_obj_set_style_bg_opa(img_area_, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(img_area_, 0, 0);
+    lv_obj_set_style_radius(img_area_, 0, 0);
+    lv_obj_set_scroll_dir(img_area_, LV_DIR_NONE);
+    lv_obj_clear_flag(img_area_, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_scrollbar_mode(img_area_, LV_SCROLLBAR_MODE_OFF);
 
     back_btn_ = lv_btn_create(viewer_);
     lv_obj_set_size(back_btn_, 24, 24);
@@ -62,6 +78,8 @@ void AppPictures::build_viewer() {
     lv_obj_set_style_border_width(back_btn_, 0, 0);
     lv_obj_set_style_shadow_opa(back_btn_, LV_OPA_TRANSP, 0);
     lv_obj_set_pos(back_btn_, 4, 4);
+    lv_obj_add_flag(back_btn_, LV_OBJ_FLAG_FLOATING);
+    lv_obj_move_foreground(back_btn_);
     lv_obj_t* lbl = lv_label_create(back_btn_);
     lv_label_set_text(lbl, LV_SYMBOL_LEFT);
     lv_obj_set_style_text_color(lbl, lv_color_hex(0x000000), 0);
@@ -69,11 +87,82 @@ void AppPictures::build_viewer() {
     lv_obj_add_flag(back_btn_, LV_OBJ_FLAG_CLICK_FOCUSABLE);
     lv_obj_add_event_cb(back_btn_, on_back_clicked, LV_EVENT_CLICKED, this);
 
-    img_ = lv_img_create(viewer_);
-    info_label_ = lv_label_create(viewer_);
+    img_ = lv_img_create(img_area_);
+    info_label_ = lv_label_create(img_area_);
     lv_obj_set_style_text_color(info_label_, lv_color_hex(0xEEEEEE), 0);
     lv_obj_set_style_text_font(info_label_, ui_theme::get_system_font(), 0);
     lv_obj_add_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
+
+    toolbar_ = lv_obj_create(viewer_);
+    lv_obj_set_size(toolbar_, lv_pct(100), 28);
+    lv_obj_set_style_bg_opa(toolbar_, LV_OPA_60, 0);
+    lv_obj_set_style_bg_color(toolbar_, lv_color_hex(0x202020), 0);
+    lv_obj_set_style_border_width(toolbar_, 0, 0);
+    lv_obj_set_style_radius(toolbar_, 0, 0);
+    lv_obj_set_style_pad_all(toolbar_, 2, 0);
+    lv_obj_set_style_pad_column(toolbar_, 4, 0);
+    lv_obj_set_flex_flow(toolbar_, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(toolbar_, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_add_flag(toolbar_, LV_OBJ_FLAG_FLOATING);
+    lv_obj_align(toolbar_, LV_ALIGN_BOTTOM_MID, 0, 0);
+    lv_obj_move_foreground(toolbar_);
+    lv_obj_move_foreground(back_btn_);
+
+    btn_zoom_in_ = lv_btn_create(toolbar_);
+    ui_theme::apply_button(btn_zoom_in_);
+    lv_obj_set_size(btn_zoom_in_, 24, 24);
+    lv_obj_t* zi_lbl = lv_label_create(btn_zoom_in_);
+    lv_label_set_text(zi_lbl, LV_SYMBOL_PLUS);
+    lv_obj_center(zi_lbl);
+    lv_obj_add_event_cb(btn_zoom_in_, on_zoom_in_clicked, LV_EVENT_CLICKED, this);
+
+    btn_zoom_out_ = lv_btn_create(toolbar_);
+    ui_theme::apply_button(btn_zoom_out_);
+    lv_obj_set_size(btn_zoom_out_, 24, 24);
+    lv_obj_t* zo_lbl = lv_label_create(btn_zoom_out_);
+    lv_label_set_text(zo_lbl, LV_SYMBOL_MINUS);
+    lv_obj_center(zo_lbl);
+    lv_obj_add_event_cb(btn_zoom_out_, on_zoom_out_clicked, LV_EVENT_CLICKED, this);
+
+    btn_fit_ = lv_btn_create(toolbar_);
+    ui_theme::apply_button(btn_fit_);
+    lv_obj_set_size(btn_fit_, 24, 24);
+    lv_obj_t* ft_lbl = lv_label_create(btn_fit_);
+    lv_label_set_text(ft_lbl, LV_SYMBOL_REFRESH);
+    lv_obj_center(ft_lbl);
+    lv_obj_add_event_cb(btn_fit_, on_fit_clicked, LV_EVENT_CLICKED, this);
+
+    btn_up_ = lv_btn_create(toolbar_);
+    ui_theme::apply_button(btn_up_);
+    lv_obj_set_size(btn_up_, 24, 24);
+    lv_obj_t* up_lbl = lv_label_create(btn_up_);
+    lv_label_set_text(up_lbl, LV_SYMBOL_UP);
+    lv_obj_center(up_lbl);
+    lv_obj_add_event_cb(btn_up_, on_pan_up_clicked, LV_EVENT_CLICKED, this);
+
+    btn_down_ = lv_btn_create(toolbar_);
+    ui_theme::apply_button(btn_down_);
+    lv_obj_set_size(btn_down_, 24, 24);
+    lv_obj_t* dn_lbl = lv_label_create(btn_down_);
+    lv_label_set_text(dn_lbl, LV_SYMBOL_DOWN);
+    lv_obj_center(dn_lbl);
+    lv_obj_add_event_cb(btn_down_, on_pan_down_clicked, LV_EVENT_CLICKED, this);
+
+    btn_left_ = lv_btn_create(toolbar_);
+    ui_theme::apply_button(btn_left_);
+    lv_obj_set_size(btn_left_, 24, 24);
+    lv_obj_t* lf_lbl = lv_label_create(btn_left_);
+    lv_label_set_text(lf_lbl, LV_SYMBOL_LEFT);
+    lv_obj_center(lf_lbl);
+    lv_obj_add_event_cb(btn_left_, on_pan_left_clicked, LV_EVENT_CLICKED, this);
+
+    btn_right_ = lv_btn_create(toolbar_);
+    ui_theme::apply_button(btn_right_);
+    lv_obj_set_size(btn_right_, 24, 24);
+    lv_obj_t* rt_lbl = lv_label_create(btn_right_);
+    lv_label_set_text(rt_lbl, LV_SYMBOL_RIGHT);
+    lv_obj_center(rt_lbl);
+    lv_obj_add_event_cb(btn_right_, on_pan_right_clicked, LV_EVENT_CLICKED, this);
 }
 
 void AppPictures::show_image(int idx) {
@@ -171,23 +260,25 @@ void AppPictures::show_image(int idx) {
     lv_obj_clear_flag(img_, LV_OBJ_FLAG_HIDDEN);
     lv_img_set_src(img_, &img_dsc_);
 
-    lv_coord_t vw = lv_obj_get_width(viewer_);
-    lv_coord_t vh = lv_obj_get_height(viewer_);
-    lv_coord_t iw = lv_obj_get_width(img_);
-    lv_coord_t ih = lv_obj_get_height(img_);
+    lv_coord_t vw = lv_obj_get_width(img_area_);
+    lv_coord_t vh = lv_obj_get_height(img_area_);
+    lv_coord_t iw = img_dsc_.header.w;
+    lv_coord_t ih = img_dsc_.header.h;
     if (iw > 0 && ih > 0 && vw > 0 && vh > 0) {
         float rw = (float)vw / (float)iw;
         float rh = (float)vh / (float)ih;
         float r = rw < rh ? rw : rh;
         if (r < 1.0f) {
-            uint16_t zoom = (uint16_t)(r * 256.0f);
-            if (zoom < 1) zoom = 1;
-            lv_img_set_zoom(img_, zoom);
+            zoom_ = (uint16_t)(r * 256.0f);
+            if (zoom_ < 1) zoom_ = 1;
         } else {
-            lv_img_set_zoom(img_, 256);
+            zoom_ = 256;
         }
+        lv_img_set_zoom(img_, zoom_);
     }
-    lv_obj_center(img_);
+    pan_x_ = 0;
+    pan_y_ = 0;
+    lv_obj_align(img_, LV_ALIGN_CENTER, 0, 0);
 }
 
 void AppPictures::onClose() {
@@ -211,4 +302,81 @@ void AppPictures::on_back_clicked(lv_event_t* e) {
         lv_obj_clear_flag(app->list_, LV_OBJ_FLAG_HIDDEN);
         app->current_index_ = -1;
     }
+}
+
+void AppPictures::fit_to_window() {
+    lv_coord_t vw = lv_obj_get_width(img_area_);
+    lv_coord_t vh = lv_obj_get_height(img_area_);
+    lv_coord_t iw = img_dsc_.header.w;
+    lv_coord_t ih = img_dsc_.header.h;
+    if (iw <= 0 || ih <= 0 || vw <= 0 || vh <= 0) return;
+    float rw = (float)vw / (float)iw;
+    float rh = (float)vh / (float)ih;
+    float r = rw < rh ? rw : rh;
+    if (r < 1.0f) {
+        zoom_ = (uint16_t)(r * 256.0f);
+        if (zoom_ < 1) zoom_ = 1;
+    } else {
+        zoom_ = 256;
+    }
+    lv_img_set_zoom(img_, zoom_);
+    pan_x_ = 0;
+    pan_y_ = 0;
+    lv_obj_align(img_, LV_ALIGN_CENTER, 0, 0);
+}
+
+void AppPictures::zoom_step(int delta) {
+    int z = (int)zoom_ + delta;
+    if (z < 16) z = 16;
+    if (z > 1024) z = 1024;
+    zoom_ = (uint16_t)z;
+    lv_img_set_zoom(img_, zoom_);
+}
+
+void AppPictures::pan_step(int dx, int dy) {
+    pan_x_ += dx;
+    pan_y_ += dy;
+    lv_obj_align(img_, LV_ALIGN_CENTER, pan_x_, pan_y_);
+}
+
+void AppPictures::on_zoom_in_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppPictures*>(lv_event_get_user_data(e));
+    if (!app) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) app->zoom_step(32);
+}
+
+void AppPictures::on_zoom_out_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppPictures*>(lv_event_get_user_data(e));
+    if (!app) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) app->zoom_step(-32);
+}
+
+void AppPictures::on_fit_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppPictures*>(lv_event_get_user_data(e));
+    if (!app) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) app->fit_to_window();
+}
+
+void AppPictures::on_pan_up_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppPictures*>(lv_event_get_user_data(e));
+    if (!app) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) app->pan_step(0, -12);
+}
+
+void AppPictures::on_pan_down_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppPictures*>(lv_event_get_user_data(e));
+    if (!app) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) app->pan_step(0, 12);
+}
+
+void AppPictures::on_pan_left_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppPictures*>(lv_event_get_user_data(e));
+    if (!app) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) app->pan_step(-12, 0);
+}
+
+void AppPictures::on_pan_right_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppPictures*>(lv_event_get_user_data(e));
+    if (!app) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) app->pan_step(12, 0);
 }

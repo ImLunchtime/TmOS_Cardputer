@@ -165,7 +165,7 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_style_min_height(lyric_prev_, 8, 0);
     lv_label_set_long_mode(lyric_prev_, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_width(lyric_prev_, lv_pct(100));
-    lv_obj_set_style_text_color(lyric_prev_, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_text_color(lyric_prev_, lv_color_hex(0xaaaaaa), 0);
     ui_theme::apply_small_text_recursive(lyric_prev_);
     lyric_curr_ = lv_label_create(content_col_);
     lv_label_set_text(lyric_curr_, "");
@@ -185,7 +185,7 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_style_min_height(lyric_next_, 8, 0);
     lv_label_set_long_mode(lyric_next_, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_width(lyric_next_, lv_pct(100));
-    lv_obj_set_style_text_color(lyric_next_, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_text_color(lyric_next_, lv_color_hex(0xaaaaaa), 0);
     ui_theme::apply_small_text_recursive(lyric_next_);
 
     // Back button first (left), then slider (right)
