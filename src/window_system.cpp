@@ -212,3 +212,59 @@ IApp* WindowSystem::activeApp() const {
     if (stack_.empty()) return nullptr;
     return stack_.back().app.get();
 }
+
+void WindowSystem::resizeActiveWindow(lv_coord_t w, lv_coord_t h) {
+    if (stack_.empty()) return;
+    auto &top = stack_.back();
+    if (!top.root) return;
+
+    const lv_coord_t scr_w = lv_disp_get_hor_res(NULL);
+    const lv_coord_t scr_h = lv_disp_get_ver_res(NULL);
+
+    if (w < 1) w = 1;
+    if (h < 1) h = 1;
+    if (w > scr_w) w = scr_w;
+    if (h > scr_h) h = scr_h;
+
+    lv_obj_set_size(top.root, w, h);
+
+    lv_coord_t x = top.x;
+    lv_coord_t y = top.y;
+    if (x + w > scr_w) x = scr_w - w;
+    if (y + h > scr_h) y = scr_h - h;
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    lv_obj_set_pos(top.root, x, y);
+
+    top.w = w;
+    top.h = h;
+    top.x = x;
+    top.y = y;
+}
+
+void WindowSystem::resizeWindow(lv_obj_t* root, lv_coord_t w, lv_coord_t h) {
+    if (!root) return;
+    const lv_coord_t scr_w = lv_disp_get_hor_res(NULL);
+    const lv_coord_t scr_h = lv_disp_get_ver_res(NULL);
+    if (w < 1) w = 1;
+    if (h < 1) h = 1;
+    if (w > scr_w) w = scr_w;
+    if (h > scr_h) h = scr_h;
+    for (auto &win : stack_) {
+        if (win.root == root) {
+            lv_obj_set_size(win.root, w, h);
+            lv_coord_t x = win.x;
+            lv_coord_t y = win.y;
+            if (x + w > scr_w) x = scr_w - w;
+            if (y + h > scr_h) y = scr_h - h;
+            if (x < 0) x = 0;
+            if (y < 0) y = 0;
+            lv_obj_set_pos(win.root, x, y);
+            win.w = w;
+            win.h = h;
+            win.x = x;
+            win.y = y;
+            break;
+        }
+    }
+}

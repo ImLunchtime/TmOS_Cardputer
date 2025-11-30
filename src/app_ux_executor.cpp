@@ -59,5 +59,5 @@ void AppUXExecutor::onItemClicked(lv_obj_t* btn) {
     int idx = it->second;
     if (idx < 0 || idx >= (int)files_.size()) return;
     String path = files_[idx].path;
-    wm_.openApp(std::unique_ptr<IApp>(new AppUXRunner(path)));
+    wm_.openApp(std::unique_ptr<IApp>(new AppUXRunner(wm_, path)));
 }

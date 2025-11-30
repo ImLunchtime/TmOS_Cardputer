@@ -1,3 +1,11 @@
+/*
+ * @Author: ImLunchtime knoxmedia@yeah.net
+ * @Date: 2025-11-08 18:13:39
+ * @LastEditors: ImLunchtime knoxmedia@yeah.net
+ * @LastEditTime: 2025-11-30 20:51:17
+ * @FilePath: \CardputerOS2_LVGL\src\window_system.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #pragma once
 #include <lvgl.h>
 #include <vector>
@@ -46,6 +54,12 @@ public:
 
     // Accessor for active app (top-most)
     IApp* activeApp() const;
+
+    // Resize the active window; keeps it within screen bounds
+    void resizeActiveWindow(lv_coord_t w, lv_coord_t h);
+
+    // Resize a specific window by its root container
+    void resizeWindow(lv_obj_t* root, lv_coord_t w, lv_coord_t h);
 
 private:
     struct WindowEntry {
