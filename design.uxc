@@ -7,6 +7,7 @@
     { "type": "textarea", "placeholder": "在此输入...", "w": 220, "h": 60 },
     { "type": "slider", "min": 0, "max": 100, "value": 20 },
     { "type": "switch", "checked": true },
-    { "type": "dropdown", "options": "选项A\n选项B\n选项C" }
+    { "type": "dropdown", "options": "选项A,选项B,选项C" },
+    { "type": "image", "src": "/i_colortest.bin", "align": "center" }
   ]
 }

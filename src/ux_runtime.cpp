@@ -1,7 +1,10 @@
 #include "ux_runtime.h"
 #include <SD.h>
+#include "theme.h"
 
 namespace ux {
+
+static lv_obj_t* s_toast = nullptr;
 
 static String trim_ws(const String& s) {
     int i = 0; int j = s.length() - 1;
@@ -108,6 +111,10 @@ void clear_children(lv_obj_t* parent) {
 }
 
 static void show_toast(lv_obj_t* root, const String& text) {
+    if (s_toast) {
+        lv_obj_del(s_toast);
+        s_toast = nullptr;
+    }
     lv_obj_t* cont = lv_obj_create(root);
     lv_obj_set_size(cont, lv_pct(90), LV_SIZE_CONTENT);
     lv_obj_align(cont, LV_ALIGN_TOP_MID, 0, 8);
@@ -117,7 +124,11 @@ static void show_toast(lv_obj_t* root, const String& text) {
     lv_obj_set_style_border_width(cont, 0, 0);
     lv_obj_t* lbl = lv_label_create(cont);
     lv_label_set_text(lbl, text.c_str());
+    lv_obj_set_style_text_font(lbl, ui_theme::get_system_font(), 0);
+    lv_obj_set_style_text_color(lbl, lv_color_hex(0xFFFFFF), 0);
     lv_obj_center(lbl);
+    s_toast = cont;
+    lv_obj_add_event_cb(cont, [](lv_event_t* e){ s_toast = nullptr; }, LV_EVENT_DELETE, nullptr);
     lv_anim_t a;
     lv_anim_init(&a);
     lv_anim_set_var(&a, cont);
@@ -184,6 +195,114 @@ static void build_widget_from_obj(const String& obj, lv_obj_t* parent) {
         w = lv_dropdown_create(parent);
         String opts = get_str(obj, "options");
         if (opts.length() > 0) lv_dropdown_set_options(w, opts.c_str());
+    } else if (type == "image") {
+        struct ImgMem { lv_img_dsc_t dsc; uint8_t* buf; };
+        String p = get_str(obj, "src");
+        if (p.length() > 0) {
+            if (!p.startsWith("/")) p = String("/") + p;
+            File f = SD.open(p.c_str(), FILE_READ);
+            if (!f) {
+                w = lv_label_create(parent);
+                lv_label_set_text(w, "图片加载失败");
+                lv_obj_set_style_text_color(w, lv_color_hex(0xEEEEEE), 0);
+                lv_obj_set_style_text_font(w, ui_theme::get_system_font(), 0);
+            } else {
+                size_t n = f.size();
+                if (n < 4) {
+                    f.close();
+                    w = lv_label_create(parent);
+                    lv_label_set_text(w, "图片加载失败");
+                    lv_obj_set_style_text_color(w, lv_color_hex(0xEEEEEE), 0);
+                    lv_obj_set_style_text_font(w, ui_theme::get_system_font(), 0);
+                } else {
+                    uint8_t hdr[4];
+                    size_t rd = f.read(hdr, 4);
+                    if (rd != 4) {
+                        f.close();
+                        w = lv_label_create(parent);
+                        lv_label_set_text(w, "图片加载失败");
+                        lv_obj_set_style_text_color(w, lv_color_hex(0xEEEEEE), 0);
+                        lv_obj_set_style_text_font(w, ui_theme::get_system_font(), 0);
+                    } else {
+                        uint32_t h32 = (uint32_t)hdr[0] | ((uint32_t)hdr[1] << 8) | ((uint32_t)hdr[2] << 16) | ((uint32_t)hdr[3] << 24);
+                        uint8_t cf = (uint8_t)(h32 & 0x1F);
+                        uint16_t iw = (uint16_t)((h32 >> 10) & 0x7FF);
+                        uint16_t ih = (uint16_t)((h32 >> 21) & 0x7FF);
+                        if (iw == 0 || ih == 0 || cf != LV_IMG_CF_TRUE_COLOR) {
+                            f.close();
+                            w = lv_label_create(parent);
+                            lv_label_set_text(w, "图片加载失败");
+                            lv_obj_set_style_text_color(w, lv_color_hex(0xEEEEEE), 0);
+                            lv_obj_set_style_text_font(w, ui_theme::get_system_font(), 0);
+                        } else {
+                            size_t data_sz = (size_t)iw * (size_t)ih * 2;
+                            if (n != data_sz + 4) {
+                                f.close();
+                                w = lv_label_create(parent);
+                                lv_label_set_text(w, "图片加载失败");
+                                lv_obj_set_style_text_color(w, lv_color_hex(0xEEEEEE), 0);
+                                lv_obj_set_style_text_font(w, ui_theme::get_system_font(), 0);
+                            } else {
+                                ImgMem* mem = (ImgMem*)malloc(sizeof(ImgMem));
+                                if (!mem) {
+                                    f.close();
+                                    w = lv_label_create(parent);
+                                    lv_label_set_text(w, "图片加载失败");
+                                    lv_obj_set_style_text_color(w, lv_color_hex(0xEEEEEE), 0);
+                                    lv_obj_set_style_text_font(w, ui_theme::get_system_font(), 0);
+                                } else {
+                                    mem->dsc.header.always_zero = 0;
+                                    mem->dsc.header.w = iw;
+                                    mem->dsc.header.h = ih;
+                                    mem->dsc.header.cf = LV_IMG_CF_TRUE_COLOR;
+                                    mem->dsc.data_size = data_sz;
+                                    mem->buf = (uint8_t*)malloc(data_sz);
+                                    if (!mem->buf) {
+                                        f.close();
+                                        free(mem);
+                                        w = lv_label_create(parent);
+                                        lv_label_set_text(w, "图片加载失败");
+                                        lv_obj_set_style_text_color(w, lv_color_hex(0xEEEEEE), 0);
+                                        lv_obj_set_style_text_font(w, ui_theme::get_system_font(), 0);
+                                    } else {
+                                        size_t rimg = f.read(mem->buf, data_sz);
+                                        f.close();
+                                        if (rimg != data_sz) {
+                                            free(mem->buf);
+                                            free(mem);
+                                            w = lv_label_create(parent);
+                                            lv_label_set_text(w, "图片加载失败");
+                                            lv_obj_set_style_text_color(w, lv_color_hex(0xEEEEEE), 0);
+                                            lv_obj_set_style_text_font(w, ui_theme::get_system_font(), 0);
+                                        } else {
+                                            mem->dsc.data = (const uint8_t*)mem->buf;
+                                            w = lv_img_create(parent);
+                                            lv_img_set_src(w, &mem->dsc);
+                                            lv_obj_add_flag(w, LV_OBJ_FLAG_CLICKABLE);
+                                            lv_obj_add_flag(w, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+                                            lv_obj_add_flag(w, LV_OBJ_FLAG_USER_1);
+                                            lv_obj_add_event_cb(w, [](lv_event_t* e){
+                                                ImgMem* m = (ImgMem*)lv_event_get_user_data(e);
+                                                if (m) {
+                                                    if (m->buf) free(m->buf);
+                                                    free(m);
+                                                }
+                                            }, LV_EVENT_DELETE, mem);
+                                            lv_obj_align(w, LV_ALIGN_CENTER, 0, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            w = lv_label_create(parent);
+            lv_label_set_text(w, "图片加载失败");
+            lv_obj_set_style_text_color(w, lv_color_hex(0xEEEEEE), 0);
+            lv_obj_set_style_text_font(w, ui_theme::get_system_font(), 0);
+        }
     }
     if (!w) return;
     long wv = get_int(obj, "w", -1);
@@ -241,3 +360,4 @@ BuildResult build_from_file(const String& path, lv_obj_t* root) {
 }
 
 }
+static lv_obj_t* s_toast = nullptr;

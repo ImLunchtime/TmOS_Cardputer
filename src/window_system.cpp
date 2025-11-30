@@ -15,6 +15,7 @@ static inline bool obj_is_focusable(lv_obj_t* obj) {
     if (lv_obj_has_class(obj, &lv_switch_class)) return true;
     if (lv_obj_has_class(obj, &lv_spinbox_class)) return true;
     if (lv_obj_has_class(obj, &lv_roller_class)) return true;
+    if (lv_obj_has_class(obj, &lv_img_class) && lv_obj_has_flag(obj, LV_OBJ_FLAG_USER_1)) return true;
     // Fallback: editable objects can be focused
     if (lv_obj_is_editable(obj)) return true;
     return false;
