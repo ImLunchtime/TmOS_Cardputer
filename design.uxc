@@ -1,0 +1,12 @@
+{
+  "title": "UXC Demo",
+  "layout": { "flow": "column", "pad": 6 },
+  "widgets": [
+    { "type": "label", "text": "欢迎使用UXC" },
+    { "type": "button", "text": "点击我", "on": { "click": { "action": "toast", "text": "已点击" } } },
+    { "type": "textarea", "placeholder": "在此输入...", "w": 220, "h": 60 },
+    { "type": "slider", "min": 0, "max": 100, "value": 20 },
+    { "type": "switch", "checked": true },
+    { "type": "dropdown", "options": "选项A\n选项B\n选项C" }
+  ]
+}

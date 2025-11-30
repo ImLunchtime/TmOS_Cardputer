@@ -30,6 +30,8 @@ public:
     void launchBluetooth();
     void launchPictures();
     void launchCircuitSim();
+    void launchUXEditor();
+    void launchUXExecutor();
 
 private:
     WindowSystem& wm_;

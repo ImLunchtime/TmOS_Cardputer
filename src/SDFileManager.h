@@ -196,6 +196,29 @@ public:
         file.close();
         return content;
     }
+
+    bool writeFile(const String& filePath, const String& content) {
+        if (!initialized) return false;
+        String p = normalizePath(filePath);
+        if (exists(p)) SD.remove(p);
+        File file = SD.open(p, FILE_WRITE);
+        if (!file) return false;
+        bool ok = file.print(content);
+        file.flush();
+        file.close();
+        return ok;
+    }
+
+    bool createFile(const String& filePath, const String& content = "") {
+        return writeFile(filePath, content);
+    }
+
+    bool deletePath(const String& path) {
+        if (!initialized) return false;
+        String p = normalizePath(path);
+        if (isDirectory(p)) return SD.rmdir(p);
+        return SD.remove(p);
+    }
     
     // Scan all files (recursive)
     bool scanAllFiles(FileInfo* fileList, int& fileCount, int maxFiles, const String& extension = "") {

@@ -15,6 +15,8 @@
 #include "app_settings.h"
 #include "app_test.h"
 #include "app_circuitsim.h"
+#include "app_ux_editor.h"
+#include "app_ux_executor.h"
 #include "theme.h"
 LV_IMG_DECLARE(icon_music_sd);
 LV_IMG_DECLARE(icon_theme);
@@ -72,6 +74,18 @@ static void on_circuitsim_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
     if (!launcher) return;
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchCircuitSim();
+}
+
+static void on_ux_editor_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchUXEditor();
+}
+
+static void on_ux_executor_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchUXExecutor();
 }
 
 void AppLauncher::onOpen(lv_obj_t* window_root) {
@@ -213,6 +227,36 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
         lv_img_set_src(img, &icon_circuitsim);
         lv_obj_center(img);
     }
+
+    lv_obj_t* btn_ux_editor = lv_btn_create(grid_);
+    lv_obj_set_size(btn_ux_editor, 48, 48);
+    lv_obj_set_style_bg_opa(btn_ux_editor, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_ux_editor, 0, 0);
+    lv_obj_set_style_radius(btn_ux_editor, 0, 0);
+    lv_obj_set_style_shadow_width(btn_ux_editor, 0, 0);
+    lv_obj_set_style_outline_width(btn_ux_editor, 0, 0);
+    lv_obj_set_grid_cell(btn_ux_editor, LV_GRID_ALIGN_CENTER, 4, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+    lv_obj_add_event_cb(btn_ux_editor, on_ux_editor_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* label = lv_label_create(btn_ux_editor);
+        lv_label_set_text(label, "UX编辑");
+        lv_obj_center(label);
+    }
+
+    lv_obj_t* btn_ux_executor = lv_btn_create(grid_);
+    lv_obj_set_size(btn_ux_executor, 48, 48);
+    lv_obj_set_style_bg_opa(btn_ux_executor, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_ux_executor, 0, 0);
+    lv_obj_set_style_radius(btn_ux_executor, 0, 0);
+    lv_obj_set_style_shadow_width(btn_ux_executor, 0, 0);
+    lv_obj_set_style_outline_width(btn_ux_executor, 0, 0);
+    lv_obj_set_grid_cell(btn_ux_executor, LV_GRID_ALIGN_CENTER, 5, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+    lv_obj_add_event_cb(btn_ux_executor, on_ux_executor_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* label = lv_label_create(btn_ux_executor);
+        lv_label_set_text(label, "UX执行");
+        lv_obj_center(label);
+    }
 }
 
 void AppLauncher::launchMusic() { wm_.openApp(std::unique_ptr<IApp>(new AppMusic())); }
@@ -223,3 +267,5 @@ void AppLauncher::launchDevices() { wm_.openApp(std::unique_ptr<IApp>(new AppDev
 void AppLauncher::launchBluetooth() { wm_.openApp(std::unique_ptr<IApp>(new AppBluetooth())); }
 void AppLauncher::launchPictures() { wm_.openApp(std::unique_ptr<IApp>(new AppPictures())); }
 void AppLauncher::launchCircuitSim() { wm_.openApp(std::unique_ptr<IApp>(new AppCircuitSim())); }
+void AppLauncher::launchUXEditor() { wm_.openApp(std::unique_ptr<IApp>(new AppUXEditor())); }
+void AppLauncher::launchUXExecutor() { wm_.openApp(std::unique_ptr<IApp>(new AppUXExecutor(wm_))); }
