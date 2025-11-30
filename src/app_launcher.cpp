@@ -25,6 +25,8 @@ LV_IMG_DECLARE(icon_devices);
 LV_IMG_DECLARE(icon_bluetooth);
 LV_IMG_DECLARE(icon_pictures);
 LV_IMG_DECLARE(icon_circuitsim);
+LV_IMG_DECLARE(icon_uxedit2);
+LV_IMG_DECLARE(icon_uxexec);
 
  
 
@@ -105,7 +107,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_radius(grid_, 0, 0);
     lv_obj_set_style_bg_opa(grid_, LV_OPA_TRANSP, 0);
     static lv_coord_t col_dsc[] = {48, 48, 48, 48, 48, 48, LV_GRID_TEMPLATE_LAST};
-    static lv_coord_t row_dsc[] = {48, 48, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {48, 48, 48, LV_GRID_TEMPLATE_LAST};
     lv_obj_set_grid_dsc_array(grid_, col_dsc, row_dsc);
 
     lv_obj_t* btn_music = lv_btn_create(grid_);
@@ -235,12 +237,12 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_radius(btn_ux_editor, 0, 0);
     lv_obj_set_style_shadow_width(btn_ux_editor, 0, 0);
     lv_obj_set_style_outline_width(btn_ux_editor, 0, 0);
-    lv_obj_set_grid_cell(btn_ux_editor, LV_GRID_ALIGN_CENTER, 4, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+    lv_obj_set_grid_cell(btn_ux_editor, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 2, 1);
     lv_obj_add_event_cb(btn_ux_editor, on_ux_editor_item_event, LV_EVENT_CLICKED, this);
     {
-        lv_obj_t* label = lv_label_create(btn_ux_editor);
-        lv_label_set_text(label, "UX编辑");
-        lv_obj_center(label);
+        lv_obj_t* img = lv_img_create(btn_ux_editor);
+        lv_img_set_src(img, &icon_uxedit2);
+        lv_obj_center(img);
     }
 
     lv_obj_t* btn_ux_executor = lv_btn_create(grid_);
@@ -250,12 +252,12 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_radius(btn_ux_executor, 0, 0);
     lv_obj_set_style_shadow_width(btn_ux_executor, 0, 0);
     lv_obj_set_style_outline_width(btn_ux_executor, 0, 0);
-    lv_obj_set_grid_cell(btn_ux_executor, LV_GRID_ALIGN_CENTER, 5, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+    lv_obj_set_grid_cell(btn_ux_executor, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 2, 1);
     lv_obj_add_event_cb(btn_ux_executor, on_ux_executor_item_event, LV_EVENT_CLICKED, this);
     {
-        lv_obj_t* label = lv_label_create(btn_ux_executor);
-        lv_label_set_text(label, "UX执行");
-        lv_obj_center(label);
+        lv_obj_t* img = lv_img_create(btn_ux_executor);
+        lv_img_set_src(img, &icon_uxexec);
+        lv_obj_center(img);
     }
 }
 

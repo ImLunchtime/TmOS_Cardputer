@@ -17,11 +17,11 @@
 #define LV_ATTRIBUTE_MEM_ALIGN
 #endif
 
-#ifndef LV_ATTRIBUTE_IMG_ICON_UXEDIT
-#define LV_ATTRIBUTE_IMG_ICON_UXEDIT
+#ifndef LV_ATTRIBUTE_IMG_ICON_UXEDIT2
+#define LV_ATTRIBUTE_IMG_ICON_UXEDIT2
 #endif
 
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_ICON_UXEDIT uint8_t icon_uxedit_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_ICON_UXEDIT2 uint8_t icon_uxedit2_map[] = {
 #if LV_COLOR_DEPTH == 1 || LV_COLOR_DEPTH == 8
   /*Pixel format: Alpha 8 bit, Red: 3 bit, Green: 3 bit, Blue: 2 bit*/
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -163,12 +163,12 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_ICON_UXED
 #endif
 };
 
-const lv_img_dsc_t icon_uxedit = {
+const lv_img_dsc_t icon_uxedit2 = {
   .header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA,
   .header.always_zero = 0,
   .header.reserved = 0,
   .header.w = 32,
   .header.h = 32,
   .data_size = 1024 * LV_IMG_PX_SIZE_ALPHA_BYTE,
-  .data = icon_uxedit_map,
+  .data = icon_uxedit2_map,
 };
