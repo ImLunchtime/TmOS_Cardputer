@@ -27,6 +27,7 @@ LV_IMG_DECLARE(icon_pictures);
 LV_IMG_DECLARE(icon_circuitsim);
 LV_IMG_DECLARE(icon_uxedit2);
 LV_IMG_DECLARE(icon_uxexec);
+LV_IMG_DECLARE(icon_settings);
 
  
 
@@ -165,9 +166,9 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_grid_cell(btn_settings, LV_GRID_ALIGN_CENTER, 3, 1, LV_GRID_ALIGN_CENTER, 0, 1);
     lv_obj_add_event_cb(btn_settings, on_settings_item_event, LV_EVENT_CLICKED, this);
     {
-        lv_obj_t* label = lv_label_create(btn_settings);
-        lv_label_set_text(label, LV_SYMBOL_SETTINGS);
-        lv_obj_center(label);
+        lv_obj_t* img = lv_img_create(btn_settings);
+        lv_img_set_src(img, &icon_settings);
+        lv_obj_center(img);
     }
 
     lv_obj_t* btn_devices = lv_btn_create(grid_);
