@@ -2,7 +2,7 @@
  * @Author: ImLunchtime knoxmedia@yeah.net
  * @Date: 2025-11-08 18:13:39
  * @LastEditors: ImLunchtime knoxmedia@yeah.net
- * @LastEditTime: 2025-11-23 17:14:27
+ * @LastEditTime: 2025-12-03 14:08:12
  * @FilePath: \CardputerOS2_LVGL\src\app_launcher.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -17,6 +17,7 @@
 #include "app_circuitsim.h"
 #include "app_ux_editor.h"
 #include "app_ux_executor.h"
+#include "app_calculator.h"
 #include "theme.h"
 LV_IMG_DECLARE(icon_music_sd);
 LV_IMG_DECLARE(icon_theme);
@@ -28,8 +29,7 @@ LV_IMG_DECLARE(icon_circuitsim);
 LV_IMG_DECLARE(icon_uxedit2);
 LV_IMG_DECLARE(icon_uxexec);
 LV_IMG_DECLARE(icon_settings);
-
- 
+LV_IMG_DECLARE(icon_calculator);
 
 static void on_music_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
@@ -89,6 +89,12 @@ static void on_ux_executor_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
     if (!launcher) return;
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchUXExecutor();
+}
+
+static void on_calculator_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchCalculator();
 }
 
 void AppLauncher::onOpen(lv_obj_t* window_root) {
@@ -260,6 +266,21 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
         lv_img_set_src(img, &icon_uxexec);
         lv_obj_center(img);
     }
+
+    lv_obj_t* btn_calculator = lv_btn_create(grid_);
+    lv_obj_set_size(btn_calculator, 48, 48);
+    lv_obj_set_style_bg_opa(btn_calculator, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_calculator, 0, 0);
+    lv_obj_set_style_radius(btn_calculator, 0, 0);
+    lv_obj_set_style_shadow_width(btn_calculator, 0, 0);
+    lv_obj_set_style_outline_width(btn_calculator, 0, 0);
+    lv_obj_set_grid_cell(btn_calculator, LV_GRID_ALIGN_CENTER, 2, 1, LV_GRID_ALIGN_CENTER, 2, 1);
+    lv_obj_add_event_cb(btn_calculator, on_calculator_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* img = lv_img_create(btn_calculator);
+        lv_img_set_src(img, &icon_calculator);
+        lv_obj_center(img);
+    }
 }
 
 void AppLauncher::launchMusic() { wm_.openApp(std::unique_ptr<IApp>(new AppMusic())); }
@@ -272,3 +293,4 @@ void AppLauncher::launchPictures() { wm_.openApp(std::unique_ptr<IApp>(new AppPi
 void AppLauncher::launchCircuitSim() { wm_.openApp(std::unique_ptr<IApp>(new AppCircuitSim())); }
 void AppLauncher::launchUXEditor() { wm_.openApp(std::unique_ptr<IApp>(new AppUXEditor())); }
 void AppLauncher::launchUXExecutor() { wm_.openApp(std::unique_ptr<IApp>(new AppUXExecutor(wm_))); }
+void AppLauncher::launchCalculator() { wm_.openApp(std::unique_ptr<IApp>(new AppCalculator())); }

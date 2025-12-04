@@ -2,7 +2,7 @@
  * @Author: ImLunchtime knoxmedia@yeah.net
  * @Date: 2025-11-08 18:13:39
  * @LastEditors: ImLunchtime knoxmedia@yeah.net
- * @LastEditTime: 2025-11-20 14:45:18
+ * @LastEditTime: 2025-12-03 13:25:16
  * @FilePath: \CardputerOS2_LVGL\src\app_launcher.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -32,6 +32,7 @@ public:
     void launchCircuitSim();
     void launchUXEditor();
     void launchUXExecutor();
+    void launchCalculator();
 
 private:
     WindowSystem& wm_;
