@@ -2,7 +2,7 @@
  * @Author: ImLunchtime knoxmedia@yeah.net
  * @Date: 2025-11-08 18:13:39
  * @LastEditors: ImLunchtime knoxmedia@yeah.net
- * @LastEditTime: 2025-12-03 14:08:12
+ * @LastEditTime: 2025-12-04 10:39:31
  * @FilePath: \CardputerOS2_LVGL\src\app_launcher.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -99,6 +99,9 @@ static void on_calculator_item_event(lv_event_t* e) {
 
 void AppLauncher::onOpen(lv_obj_t* window_root) {
     root_ = window_root;
+    // Narrow window to fit 4x36px items
+    lv_obj_set_width(root_, 37 * 4);
+
     lv_obj_set_flex_flow(root_, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_all(root_, 0, 0);
     lv_obj_set_style_pad_row(root_, 0, 0);
@@ -113,12 +116,12 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_border_width(grid_, 0, 0);
     lv_obj_set_style_radius(grid_, 0, 0);
     lv_obj_set_style_bg_opa(grid_, LV_OPA_TRANSP, 0);
-    static lv_coord_t col_dsc[] = {48, 48, 48, 48, 48, 48, LV_GRID_TEMPLATE_LAST};
-    static lv_coord_t row_dsc[] = {48, 48, 48, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t col_dsc[] = {36, 36, 36, 36, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {36, 36, 36, LV_GRID_TEMPLATE_LAST};
     lv_obj_set_grid_dsc_array(grid_, col_dsc, row_dsc);
 
     lv_obj_t* btn_music = lv_btn_create(grid_);
-    lv_obj_set_size(btn_music, 48, 48);
+    lv_obj_set_size(btn_music, 36, 36);
     lv_obj_set_style_bg_opa(btn_music, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_music, 0, 0);
     lv_obj_set_style_radius(btn_music, 0, 0);
@@ -133,7 +136,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     }
 
     lv_obj_t* btn_theme = lv_btn_create(grid_);
-    lv_obj_set_size(btn_theme, 48, 48);
+    lv_obj_set_size(btn_theme, 36, 36);
     lv_obj_set_style_bg_opa(btn_theme, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_theme, 0, 0);
     lv_obj_set_style_radius(btn_theme, 0, 0);
@@ -148,7 +151,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     }
 
     lv_obj_t* btn_test = lv_btn_create(grid_);
-    lv_obj_set_size(btn_test, 48, 48);
+    lv_obj_set_size(btn_test, 36, 36);
     lv_obj_set_style_bg_opa(btn_test, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_test, 0, 0);
     lv_obj_set_style_radius(btn_test, 0, 0);
@@ -163,7 +166,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     }
 
     lv_obj_t* btn_settings = lv_btn_create(grid_);
-    lv_obj_set_size(btn_settings, 48, 48);
+    lv_obj_set_size(btn_settings, 36, 36);
     lv_obj_set_style_bg_opa(btn_settings, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_settings, 0, 0);
     lv_obj_set_style_radius(btn_settings, 0, 0);
@@ -178,7 +181,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     }
 
     lv_obj_t* btn_devices = lv_btn_create(grid_);
-    lv_obj_set_size(btn_devices, 48, 48);
+    lv_obj_set_size(btn_devices, 36, 36);
     lv_obj_set_style_bg_opa(btn_devices, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_devices, 0, 0);
     lv_obj_set_style_radius(btn_devices, 0, 0);
@@ -193,7 +196,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     }
 
     lv_obj_t* btn_bluetooth = lv_btn_create(grid_);
-    lv_obj_set_size(btn_bluetooth, 48, 48);
+    lv_obj_set_size(btn_bluetooth, 36, 36);
     lv_obj_set_style_bg_opa(btn_bluetooth, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_bluetooth, 0, 0);
     lv_obj_set_style_radius(btn_bluetooth, 0, 0);
@@ -208,7 +211,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     }
 
     lv_obj_t* btn_pictures = lv_btn_create(grid_);
-    lv_obj_set_size(btn_pictures, 48, 48);
+    lv_obj_set_size(btn_pictures, 36, 36);
     lv_obj_set_style_bg_opa(btn_pictures, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_pictures, 0, 0);
     lv_obj_set_style_radius(btn_pictures, 0, 0);
@@ -223,7 +226,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     }
 
     lv_obj_t* btn_circuitsim = lv_btn_create(grid_);
-    lv_obj_set_size(btn_circuitsim, 48, 48);
+    lv_obj_set_size(btn_circuitsim, 36, 36);
     lv_obj_set_style_bg_opa(btn_circuitsim, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_circuitsim, 0, 0);
     lv_obj_set_style_radius(btn_circuitsim, 0, 0);
@@ -238,7 +241,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     }
 
     lv_obj_t* btn_ux_editor = lv_btn_create(grid_);
-    lv_obj_set_size(btn_ux_editor, 48, 48);
+    lv_obj_set_size(btn_ux_editor, 36, 36);
     lv_obj_set_style_bg_opa(btn_ux_editor, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_ux_editor, 0, 0);
     lv_obj_set_style_radius(btn_ux_editor, 0, 0);
@@ -253,7 +256,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     }
 
     lv_obj_t* btn_ux_executor = lv_btn_create(grid_);
-    lv_obj_set_size(btn_ux_executor, 48, 48);
+    lv_obj_set_size(btn_ux_executor, 36, 36);
     lv_obj_set_style_bg_opa(btn_ux_executor, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_ux_executor, 0, 0);
     lv_obj_set_style_radius(btn_ux_executor, 0, 0);
@@ -268,7 +271,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     }
 
     lv_obj_t* btn_calculator = lv_btn_create(grid_);
-    lv_obj_set_size(btn_calculator, 48, 48);
+    lv_obj_set_size(btn_calculator, 36, 36);
     lv_obj_set_style_bg_opa(btn_calculator, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_width(btn_calculator, 0, 0);
     lv_obj_set_style_radius(btn_calculator, 0, 0);
