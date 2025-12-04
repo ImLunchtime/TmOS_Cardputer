@@ -39,14 +39,21 @@ private:
     lv_coord_t pan_x_ = 0;
     lv_coord_t pan_y_ = 0;
     
+    lv_obj_t* password_view_ = nullptr;
+    lv_obj_t* password_ta_ = nullptr;
+    
     std::vector<FileInfo> files_;
     std::map<lv_obj_t*, int> item_index_;
     SDFileManager fm_;
     int current_index_ = -1;
+    lv_obj_t* decrypt_btn_ = nullptr;
 
     void build_list();
     void build_viewer();
+    void build_password_view();
     void show_image(int idx);
+    void check_and_load_encrypted(const char* password);
+    void show_encrypted_image(const String& path);
     void fit_to_window();
     void zoom_step(int delta);
     void pan_step(int dx, int dy);
@@ -59,4 +66,7 @@ private:
     static void on_pan_down_clicked(lv_event_t* e);
     static void on_pan_left_clicked(lv_event_t* e);
     static void on_pan_right_clicked(lv_event_t* e);
+    static void on_decrypt_clicked(lv_event_t* e);
+    static void on_password_submit(lv_event_t* e);
+    static void on_password_cancel(lv_event_t* e);
 };
