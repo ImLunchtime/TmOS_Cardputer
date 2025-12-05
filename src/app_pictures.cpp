@@ -405,10 +405,12 @@ void AppPictures::on_pan_right_clicked(lv_event_t* e) {
 
 void AppPictures::build_password_view() {
     password_view_ = lv_obj_create(root_);
-    lv_obj_set_size(password_view_, lv_pct(100), lv_pct(100));
+    lv_obj_set_size(password_view_, LV_SIZE_CONTENT, lv_pct(100));
     lv_obj_set_flex_grow(password_view_, 1);
     lv_obj_set_flex_flow(password_view_, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(password_view_, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_center(password_view_);
+    lv_obj_set_style_max_width(password_view_, 200, 0);
     lv_obj_set_style_pad_all(password_view_, 2, 0);
     lv_obj_set_style_pad_row(password_view_, 4, 0);
 
@@ -416,10 +418,10 @@ void AppPictures::build_password_view() {
     lv_textarea_set_one_line(password_ta_, true);
     lv_textarea_set_password_mode(password_ta_, true);
     lv_textarea_set_placeholder_text(password_ta_, "Password");
-    lv_obj_set_width(password_ta_, lv_pct(95));
+    lv_obj_set_width(password_ta_, 180);
     
     lv_obj_t* btn_cont = lv_obj_create(password_view_);
-    lv_obj_set_size(btn_cont, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_size(btn_cont, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(btn_cont, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(btn_cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_gap(btn_cont, 10, 0);
@@ -430,6 +432,8 @@ void AppPictures::build_password_view() {
     lv_obj_t* btn_ok = lv_btn_create(btn_cont);
     ui_theme::apply_button(btn_ok);
     lv_obj_set_height(btn_ok, 28);
+    lv_obj_set_width(btn_ok, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_hor(btn_ok, 6, 0);
     lv_obj_t* lbl_ok = lv_label_create(btn_ok);
     lv_label_set_text(lbl_ok, LV_SYMBOL_OK " OK");
     lv_obj_center(lbl_ok);
@@ -438,6 +442,8 @@ void AppPictures::build_password_view() {
     lv_obj_t* btn_cancel = lv_btn_create(btn_cont);
     ui_theme::apply_button(btn_cancel);
     lv_obj_set_height(btn_cancel, 28);
+    lv_obj_set_width(btn_cancel, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_hor(btn_cancel, 6, 0);
     lv_obj_t* lbl_cancel = lv_label_create(btn_cancel);
     lv_label_set_text(lbl_cancel, LV_SYMBOL_CLOSE " Cancel");
     lv_obj_center(lbl_cancel);
@@ -450,8 +456,9 @@ void AppPictures::on_decrypt_clicked(lv_event_t* e) {
     lv_obj_add_flag(app->list_, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(app->password_view_, LV_OBJ_FLAG_HIDDEN);
     lv_textarea_set_text(app->password_ta_, "");
-    // Request focus (may need delay or special handling in some LVGL versions/drivers, but try this)
-    lv_obj_add_state(app->password_ta_, LV_STATE_FOCUSED);
+    lv_group_t* grp = kb_get_current_group();
+    if (grp) lv_group_add_obj(grp, app->password_ta_);
+    lv_group_focus_obj(app->password_ta_);
 }
 
 void AppPictures::on_password_submit(lv_event_t* e) {

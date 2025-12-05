@@ -125,8 +125,8 @@ void WindowSystem::applyActiveState() {
         if (i + 1 == stack_.size()) {
             // Active window
             lv_obj_clear_state(win.root, LV_STATE_DISABLED);
-            if (indev && win.group) lv_indev_set_group(indev, win.group);
-            else if (indev) lv_indev_set_group(indev, kb_get_group());
+            if (win.group) kb_set_indev_group(win.group);
+            else kb_set_indev_group(kb_get_group());
             kb_set_active_app(win.app.get());
         } else {
             // Background window: disable
@@ -135,9 +135,7 @@ void WindowSystem::applyActiveState() {
     }
     // If no windows remain, restore default keyboard group
     if (stack_.empty()) {
-        if (indev) {
-            lv_indev_set_group(indev, kb_get_group());
-        }
+        kb_set_indev_group(kb_get_group());
         kb_set_active_app(nullptr);
     }
 }
@@ -175,9 +173,8 @@ void WindowSystem::closeTop() {
     stack_.pop_back();
 
     // Detach input device from this window's group before deletion
-    lv_indev_t* indev = kb_get_indev();
-    if (indev && entry.group) {
-        lv_indev_set_group(indev, NULL);
+    if (entry.group) {
+        kb_set_indev_group(NULL);
     }
 
     if (entry.app) entry.app->onClose();

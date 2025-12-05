@@ -2,7 +2,7 @@
  * @Author: ImLunchtime knoxmedia@yeah.net
  * @Date: 2025-11-07 17:33:17
  * @LastEditors: ImLunchtime knoxmedia@yeah.net
- * @LastEditTime: 2025-12-05 10:34:20
+ * @LastEditTime: 2025-12-05 10:47:39
  * @FilePath: \CardputerOS2_LVGL\src\input_kb.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -14,6 +14,7 @@
 
 static lv_indev_t *kb_indev = nullptr;
 static lv_group_t *kb_group = nullptr;
+static lv_group_t *kb_current_group = nullptr;
 static std::vector<uint16_t> key_queue;
 static uint16_t current_key = 0;
 static bool emit_release_next = false;
@@ -69,10 +70,16 @@ void kb_init() {
 
     kb_group = lv_group_create();
     lv_indev_set_group(kb_indev, kb_group);
+    kb_current_group = kb_group;
 }
 
 lv_indev_t* kb_get_indev() { return kb_indev; }
 lv_group_t* kb_get_group() { return kb_group; }
+lv_group_t* kb_get_current_group() { return kb_current_group ? kb_current_group : kb_group; }
+void kb_set_indev_group(lv_group_t* group) {
+    kb_current_group = group;
+    if (kb_indev) lv_indev_set_group(kb_indev, group);
+}
 
 void kb_set_active_app(IApp* app) { g_active_app = app; }
 void kb_register_app_keys(IApp* owner, const std::vector<AppCustomKey>& keys) {
