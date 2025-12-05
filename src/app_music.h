@@ -214,4 +214,7 @@ private:
     void setAudioVolume(int volume);
     void updateAudioStatus(bool playing, bool paused, const char* songPath);
     void updateAudioError(const char* errorMsg);
+
+    // Keyboard shortcuts
+    void adjustVolumeDelta(int delta);
 };

@@ -81,6 +81,14 @@ void AppMusic::onOpen(lv_obj_t* window_root) {
     // Scan SD for music files
     scanMusic();
     populateArtistList();
+
+    // Register keyboard shortcuts for volume control
+    kb_register_app_keys(this, {
+        { 'Z', [this](){ return in_player_mode_; }, [this](){ adjustVolumeDelta(+1); } },
+        { 'z', [this](){ return in_player_mode_; }, [this](){ adjustVolumeDelta(+1); } },
+        { 'X', [this](){ return in_player_mode_; }, [this](){ adjustVolumeDelta(-1); } },
+        { 'x', [this](){ return in_player_mode_; }, [this](){ adjustVolumeDelta(-1); } },
+    });
 }
 
 void AppMusic::onTick() {
@@ -100,6 +108,7 @@ void AppMusic::onClose() {
         audioTaskHandle_ = nullptr;
     }
     // UI objects are deleted by WindowSystem when container is destroyed
+    kb_clear_app_keys(this);
 }
 
 void AppMusic::buildUI(lv_obj_t* parent) {
@@ -723,6 +732,20 @@ void AppMusic::setAudioVolume(int volume) {
     if (audioStatusMutex_ && xSemaphoreTake(audioStatusMutex_, pdMS_TO_TICKS(5)) == pdTRUE) {
         audioStatus_.currentVolume = volume;
         xSemaphoreGive(audioStatusMutex_);
+    }
+}
+
+void AppMusic::adjustVolumeDelta(int delta) {
+    int cur = 5;
+    if (audioStatusMutex_ && xSemaphoreTake(audioStatusMutex_, pdMS_TO_TICKS(5)) == pdTRUE) {
+        cur = audioStatus_.currentVolume;
+        xSemaphoreGive(audioStatusMutex_);
+    }
+    int nv = cur + delta;
+    if (nv < 0) nv = 0; if (nv > 10) nv = 10;
+    sendAudioCommand(AUDIO_CMD_VOLUME, nv);
+    if (player_volume_) {
+        lv_slider_set_value(player_volume_, nv, LV_ANIM_OFF);
     }
 }
 

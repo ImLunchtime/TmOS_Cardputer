@@ -19,6 +19,7 @@
 #include "app_ux_executor.h"
 #include "app_calculator.h"
 #include "theme.h"
+#include "input_kb.h"
 LV_IMG_DECLARE(icon_music_sd);
 LV_IMG_DECLARE(icon_theme);
 LV_IMG_DECLARE(icon_test);
@@ -128,6 +129,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_music, 0, 0);
     lv_obj_set_style_outline_width(btn_music, 0, 0);
     lv_obj_set_grid_cell(btn_music, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+    items_.push_back({btn_music, 0, 0});
     lv_obj_add_event_cb(btn_music, on_music_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_music);
@@ -143,6 +145,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_theme, 0, 0);
     lv_obj_set_style_outline_width(btn_theme, 0, 0);
     lv_obj_set_grid_cell(btn_theme, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+    items_.push_back({btn_theme, 1, 0});
     lv_obj_add_event_cb(btn_theme, on_theme_center_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_theme);
@@ -158,6 +161,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_test, 0, 0);
     lv_obj_set_style_outline_width(btn_test, 0, 0);
     lv_obj_set_grid_cell(btn_test, LV_GRID_ALIGN_CENTER, 2, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+    items_.push_back({btn_test, 2, 0});
     lv_obj_add_event_cb(btn_test, on_test_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_test);
@@ -173,6 +177,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_settings, 0, 0);
     lv_obj_set_style_outline_width(btn_settings, 0, 0);
     lv_obj_set_grid_cell(btn_settings, LV_GRID_ALIGN_CENTER, 3, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+    items_.push_back({btn_settings, 3, 0});
     lv_obj_add_event_cb(btn_settings, on_settings_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_settings);
@@ -188,6 +193,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_devices, 0, 0);
     lv_obj_set_style_outline_width(btn_devices, 0, 0);
     lv_obj_set_grid_cell(btn_devices, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+    items_.push_back({btn_devices, 0, 1});
     lv_obj_add_event_cb(btn_devices, on_devices_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_devices);
@@ -203,6 +209,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_bluetooth, 0, 0);
     lv_obj_set_style_outline_width(btn_bluetooth, 0, 0);
     lv_obj_set_grid_cell(btn_bluetooth, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+    items_.push_back({btn_bluetooth, 1, 1});
     lv_obj_add_event_cb(btn_bluetooth, on_bluetooth_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_bluetooth);
@@ -218,6 +225,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_pictures, 0, 0);
     lv_obj_set_style_outline_width(btn_pictures, 0, 0);
     lv_obj_set_grid_cell(btn_pictures, LV_GRID_ALIGN_CENTER, 2, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+    items_.push_back({btn_pictures, 2, 1});
     lv_obj_add_event_cb(btn_pictures, on_pictures_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_pictures);
@@ -233,6 +241,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_circuitsim, 0, 0);
     lv_obj_set_style_outline_width(btn_circuitsim, 0, 0);
     lv_obj_set_grid_cell(btn_circuitsim, LV_GRID_ALIGN_CENTER, 3, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+    items_.push_back({btn_circuitsim, 3, 1});
     lv_obj_add_event_cb(btn_circuitsim, on_circuitsim_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_circuitsim);
@@ -248,6 +257,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_ux_editor, 0, 0);
     lv_obj_set_style_outline_width(btn_ux_editor, 0, 0);
     lv_obj_set_grid_cell(btn_ux_editor, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 2, 1);
+    items_.push_back({btn_ux_editor, 0, 2});
     lv_obj_add_event_cb(btn_ux_editor, on_ux_editor_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_ux_editor);
@@ -263,6 +273,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_ux_executor, 0, 0);
     lv_obj_set_style_outline_width(btn_ux_executor, 0, 0);
     lv_obj_set_grid_cell(btn_ux_executor, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 2, 1);
+    items_.push_back({btn_ux_executor, 1, 2});
     lv_obj_add_event_cb(btn_ux_executor, on_ux_executor_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_ux_executor);
@@ -278,6 +289,14 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_shadow_width(btn_calculator, 0, 0);
     lv_obj_set_style_outline_width(btn_calculator, 0, 0);
     lv_obj_set_grid_cell(btn_calculator, LV_GRID_ALIGN_CENTER, 2, 1, LV_GRID_ALIGN_CENTER, 2, 1);
+    items_.push_back({btn_calculator, 2, 2});
+
+    kb_register_app_keys(this, {
+        { ';', [this](){ return true; }, [this](){ moveFocus(0, -1); } },
+        { ',', [this](){ return true; }, [this](){ moveFocus(-1, 0); } },
+        { '.', [this](){ return true; }, [this](){ moveFocus(0, 1); } },
+        { '/', [this](){ return true; }, [this](){ moveFocus(1, 0); } },
+    });
     lv_obj_add_event_cb(btn_calculator, on_calculator_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_calculator);
@@ -297,3 +316,15 @@ void AppLauncher::launchCircuitSim() { wm_.openApp(std::unique_ptr<IApp>(new App
 void AppLauncher::launchUXEditor() { wm_.openApp(std::unique_ptr<IApp>(new AppUXEditor())); }
 void AppLauncher::launchUXExecutor() { wm_.openApp(std::unique_ptr<IApp>(new AppUXExecutor(wm_))); }
 void AppLauncher::launchCalculator() { wm_.openApp(std::unique_ptr<IApp>(new AppCalculator())); }
+void AppLauncher::moveFocus(int dx, int dy) {
+    int curc = -1, curr = -1;
+    for (auto &it : items_) { if (lv_obj_has_state(it.obj, LV_STATE_FOCUSED)) { curc = it.col; curr = it.row; break; } }
+    if (curc < 0 || curr < 0) return;
+    int tc = curc + dx;
+    int tr = curr + dy;
+    if (tc < 0 || tc >= cols_ || tr < 0 || tr >= rows_) return;
+    for (auto &it : items_) { if (it.col == tc && it.row == tr) { lv_group_focus_obj(it.obj); return; } }
+}
+void AppLauncher::onClose() {
+    kb_clear_app_keys(this);
+}

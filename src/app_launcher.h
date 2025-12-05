@@ -8,6 +8,8 @@
  */
 #pragma once
 #include "window_system.h"
+#include <vector>
+#include "input_kb.h"
 
 class AppLauncher : public IApp {
 public:
@@ -20,7 +22,7 @@ public:
 
     void onOpen(lv_obj_t* window_root) override;
     void onTick() override {}
-    void onClose() override {}
+    void onClose() override;
 
     void launchMusic();
     void launchThemeCenter();
@@ -38,4 +40,9 @@ private:
     WindowSystem& wm_;
     lv_obj_t* root_ = nullptr;
     lv_obj_t* grid_ = nullptr;
+    struct GridItem { lv_obj_t* obj; int col; int row; };
+    std::vector<GridItem> items_;
+    int cols_ = 4;
+    int rows_ = 3;
+    void moveFocus(int dx, int dy);
 };

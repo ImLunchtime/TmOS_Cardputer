@@ -127,6 +127,7 @@ void WindowSystem::applyActiveState() {
             lv_obj_clear_state(win.root, LV_STATE_DISABLED);
             if (indev && win.group) lv_indev_set_group(indev, win.group);
             else if (indev) lv_indev_set_group(indev, kb_get_group());
+            kb_set_active_app(win.app.get());
         } else {
             // Background window: disable
             lv_obj_add_state(win.root, LV_STATE_DISABLED);
@@ -137,6 +138,7 @@ void WindowSystem::applyActiveState() {
         if (indev) {
             lv_indev_set_group(indev, kb_get_group());
         }
+        kb_set_active_app(nullptr);
     }
 }
 

@@ -3,6 +3,7 @@
 #include <M5Cardputer.h>
 #include <cstring>
 #include <MD5Builder.h>
+#include "input_kb.h"
 
 AppPictures::AppPictures() {}
 AppPictures::~AppPictures() {}
@@ -33,6 +34,15 @@ void AppPictures::onOpen(lv_obj_t* window_root) {
     build_password_view();
     lv_obj_add_flag(viewer_, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(password_view_, LV_OBJ_FLAG_HIDDEN);
+
+    kb_register_app_keys(this, {
+        { ';', [this](){ return viewer_ && !lv_obj_has_flag(viewer_, LV_OBJ_FLAG_HIDDEN); }, [this](){ pan_step(0, -12); } },
+        { '.', [this](){ return viewer_ && !lv_obj_has_flag(viewer_, LV_OBJ_FLAG_HIDDEN); }, [this](){ pan_step(0, 12); } },
+        { ',', [this](){ return viewer_ && !lv_obj_has_flag(viewer_, LV_OBJ_FLAG_HIDDEN); }, [this](){ pan_step(-12, 0); } },
+        { '/', [this](){ return viewer_ && !lv_obj_has_flag(viewer_, LV_OBJ_FLAG_HIDDEN); }, [this](){ pan_step(12, 0); } },
+        { '-', [this](){ return viewer_ && !lv_obj_has_flag(viewer_, LV_OBJ_FLAG_HIDDEN); }, [this](){ zoom_step(-32); } },
+        { '=', [this](){ return viewer_ && !lv_obj_has_flag(viewer_, LV_OBJ_FLAG_HIDDEN); }, [this](){ zoom_step(32); } },
+    });
 }
 
 void AppPictures::build_list() {
@@ -294,6 +304,7 @@ void AppPictures::show_image(int idx) {
 
 void AppPictures::onClose() {
     if (img_buf_) { free(img_buf_); img_buf_ = nullptr; }
+    kb_clear_app_keys(this);
 }
 
 void AppPictures::on_item_clicked(lv_event_t* e) {
