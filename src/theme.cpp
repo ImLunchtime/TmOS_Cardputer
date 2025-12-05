@@ -123,8 +123,10 @@ void apply_button(lv_obj_t* btn) {
 }
 
 lv_obj_t* create_wallpaper() {
-    // Wallpaper removed to save flash space
-    return NULL;
+    lv_obj_t* scr = lv_scr_act();
+    lv_obj_set_style_bg_color(scr, lv_color_hex(0x808080), 0);
+    lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
+    return scr;
 }
 
 void apply_list_menu(lv_obj_t* list) {
