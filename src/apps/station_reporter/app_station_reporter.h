@@ -44,8 +44,10 @@ private:
     void buildTab1(lv_obj_t* parent);
     void buildTab2(lv_obj_t* parent);
     void buildTab3(lv_obj_t* parent);
+    void buildTab4(lv_obj_t* parent);
     void refreshStationList();
     void loadRouteList();
+    void refreshTipsButtons();
     void start_depart_announcement();
 
     static void event_handler(lv_event_t* e);
@@ -72,10 +74,14 @@ private:
     // Tab 3 Controls
     lv_obj_t* list_routes_ = nullptr;
     lv_obj_t* sr_volume_ = nullptr;
+    // Tab 4 Controls
+    lv_obj_t* tips_list_ = nullptr;
 
     // Logic
     std::vector<Station> stations_;
     std::vector<RouteInfo> available_routes_;
+    struct Tip { String label; String audio; };
+    std::vector<Tip> tips_;
     int current_station_idx_ = 0;
     String route_name_ = "Unknown Route";
     String line_audio_;

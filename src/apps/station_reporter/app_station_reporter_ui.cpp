@@ -117,6 +117,10 @@ void AppStationReporter::buildTab3(lv_obj_t* parent) {
     lv_obj_set_size(list_routes_, LV_PCT(100), LV_PCT(100));
     lv_obj_set_flex_grow(list_routes_, 1);
 }
+void AppStationReporter::buildTab4(lv_obj_t* parent) {
+    tips_list_ = lv_list_create(parent);
+    lv_obj_set_size(tips_list_, LV_PCT(100), LV_PCT(100));
+}
 
 void AppStationReporter::loadRouteList() {
     available_routes_.clear();
@@ -139,6 +143,17 @@ void AppStationReporter::loadRouteList() {
         for (JsonVariant v : templ) audio_template_.push_back(v.as<String>());
     }
 
+    tips_.clear();
+    if (doc.containsKey("tips_buttons")) {
+        JsonArray tipsArr = doc["tips_buttons"];
+        for (JsonObject t : tipsArr) {
+            Tip tip;
+            tip.label = t["label"].as<String>();
+            tip.audio = t["audio"].as<String>();
+            tips_.push_back(tip);
+        }
+    }
+
     JsonArray routes = doc["routes"];
     for (JsonObject r : routes) {
         RouteInfo info;
@@ -147,6 +162,17 @@ void AppStationReporter::loadRouteList() {
         available_routes_.push_back(info);
 
         lv_obj_t* btn = lv_list_add_btn(list_routes_, NULL, info.name.c_str());
+        lv_obj_set_style_text_font(btn, ui_theme::get_system_font(), 0);
+        lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, this);
+    }
+    refreshTipsButtons();
+}
+
+void AppStationReporter::refreshTipsButtons() {
+    if (!tips_list_) return;
+    lv_obj_clean(tips_list_);
+    for (const auto& tip : tips_) {
+        lv_obj_t* btn = lv_list_add_btn(tips_list_, NULL, tip.label.c_str());
         lv_obj_set_style_text_font(btn, ui_theme::get_system_font(), 0);
         lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, this);
     }
@@ -308,6 +334,17 @@ void AppStationReporter::event_handler(lv_event_t* e) {
                         app->loadRoute(path);
                         app->updateUI();
                         lv_tabview_set_act(app->tabview_, 0, LV_ANIM_ON);
+                        break;
+                    }
+                }
+            }
+        } else if (lv_obj_get_parent(target) == app->tips_list_) {
+            const char* txt = lv_list_get_btn_text(app->tips_list_, target);
+            if (txt) {
+                for (const auto& tip : app->tips_) {
+                    if (tip.label == txt) {
+                        String path = String("/bus_routes/audios/") + tip.audio;
+                        app->sendAudioCommand(AUDIO_CMD_PLAY, 0, path.c_str());
                         break;
                     }
                 }

@@ -40,10 +40,12 @@ void AppStationReporter::onOpen(lv_obj_t* window_root) {
     lv_obj_t* t1 = lv_tabview_add_tab(tabview_, "Control");
     lv_obj_t* t2 = lv_tabview_add_tab(tabview_, "Route");
     lv_obj_t* t3 = lv_tabview_add_tab(tabview_, "Settings");
+    lv_obj_t* t4 = lv_tabview_add_tab(tabview_, "Tips");
     
     buildTab1(t1);
     buildTab2(t2);
     buildTab3(t3);
+    buildTab4(t4);
 
     loadRouteList();
 
