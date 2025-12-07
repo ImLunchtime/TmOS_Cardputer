@@ -20,6 +20,7 @@
 #include "apps/calculator/app_calculator.h"
 #include "apps/radiosim/app_radiosim.h"
 #include "apps/trainsim/app_trainsim.h"
+#include "apps/station_reporter/app_station_reporter.h"
 #include "theme.h"
 #include "input_kb.h"
 LV_IMG_DECLARE(icon_music_sd);
@@ -35,6 +36,7 @@ LV_IMG_DECLARE(icon_settings);
 LV_IMG_DECLARE(icon_calculator);
 LV_IMG_DECLARE(icon_radio);
 LV_IMG_DECLARE(icon_train);
+LV_IMG_DECLARE(icon_station_reporter);
 
 static void on_music_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
@@ -112,6 +114,12 @@ static void on_trainsim_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
     if (!launcher) return;
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchTrainSim();
+}
+
+static void on_station_reporter_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchStationReporter();
 }
 
 void AppLauncher::onOpen(lv_obj_t* window_root) {
@@ -351,6 +359,22 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
         lv_img_set_src(img, &icon_train);
         lv_obj_center(img);
     }
+
+    lv_obj_t* btn_station = lv_btn_create(grid_);
+    lv_obj_set_size(btn_station, 36, 36);
+    lv_obj_set_style_bg_opa(btn_station, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_station, 0, 0);
+    lv_obj_set_style_radius(btn_station, 0, 0);
+    lv_obj_set_style_shadow_width(btn_station, 0, 0);
+    lv_obj_set_style_outline_width(btn_station, 0, 0);
+    lv_obj_set_grid_cell(btn_station, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 3, 1);
+    items_.push_back({btn_station, 1, 3});
+    lv_obj_add_event_cb(btn_station, on_station_reporter_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* img = lv_img_create(btn_station);
+        lv_img_set_src(img, &icon_station_reporter);
+        lv_obj_center(img);
+    }
 }
 
 void AppLauncher::launchMusic() { wm_.openApp(std::unique_ptr<IApp>(new AppMusic())); }
@@ -366,6 +390,7 @@ void AppLauncher::launchUXExecutor() { wm_.openApp(std::unique_ptr<IApp>(new App
 void AppLauncher::launchCalculator() { wm_.openApp(std::unique_ptr<IApp>(new AppCalculator())); }
 void AppLauncher::launchRadioSim() { wm_.openApp(std::unique_ptr<IApp>(new AppRadioSim())); }
 void AppLauncher::launchTrainSim() { wm_.openApp(std::unique_ptr<IApp>(new AppTrainSim())); }
+void AppLauncher::launchStationReporter() { wm_.openApp(std::unique_ptr<IApp>(new AppStationReporter())); }
 void AppLauncher::moveFocus(int dx, int dy) {
     int curc = -1, curr = -1;
     for (auto &it : items_) { if (lv_obj_has_state(it.obj, LV_STATE_FOCUSED)) { curc = it.col; curr = it.row; break; } }

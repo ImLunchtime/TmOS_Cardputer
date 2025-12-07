@@ -1,0 +1,10 @@
+{
+  "route_name": "Downtown Line 1",
+  "stations": [
+    { "id": "s1", "name": "Central Station" },
+    { "id": "s2", "name": "Market Square" },
+    { "id": "s3", "name": "City Hall" },
+    { "id": "s4", "name": "University" },
+    { "id": "s5", "name": "North Terminal" }
+  ]
+}

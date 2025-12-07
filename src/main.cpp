@@ -12,6 +12,7 @@
 #include "lvgl_port.h"
 #include "input_kb.h"
 #include "window_system.h"
+#include "SDFileManager.h"
 #include "apps/launcher/app_launcher.h"
 #include "apps/theme_center/app_theme_center.h"
 #include "apps/settings/app_settings.h"
@@ -26,6 +27,14 @@ void setup() {
     M5Cardputer.begin(cfg, true);
     M5Cardputer.Keyboard.begin();
     M5.begin(cfg);
+
+    // Initialize SD Card
+    static SDFileManager sd_manager;
+    if (!sd_manager.initialize()) {
+        Serial.println("SD card initialization failed");
+    } else {
+        Serial.println("SD card initialized");
+    }
 
     lvgl_setup();
     kb_init();

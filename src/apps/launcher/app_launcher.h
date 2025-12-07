@@ -37,6 +37,7 @@ public:
     void launchCalculator();
     void launchRadioSim();
     void launchTrainSim();
+    void launchStationReporter();
 
 private:
     WindowSystem& wm_;
