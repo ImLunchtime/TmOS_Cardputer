@@ -1,0 +1,85 @@
+#include "apps/music/app_music.h"
+#include <SD.h>
+#include <algorithm>
+
+std::string AppMusic::replaceExtension(const std::string& path, const char* newExt) {
+    size_t p = path.find_last_of('.');
+    if (p == std::string::npos) return path + newExt;
+    return path.substr(0, p) + newExt;
+}
+
+uint32_t AppMusic::parse_lrc_timestamp(const char* p, size_t len) {
+    int mm = 0, ss = 0, xx = 0;
+    const char* end = p + len;
+    const char* c = p;
+    while (c < end && *c >= '0' && *c <= '9') { mm = mm * 10 + (*c - '0'); c++; }
+    if (c < end && (*c == ':' || *c == '.')) c++;
+    while (c < end && *c >= '0' && *c <= '9') { ss = ss * 10 + (*c - '0'); c++; }
+    if (c < end && (*c == '.' || *c == ':')) c++;
+    while (c < end && *c >= '0' && *c <= '9') { xx = xx * 10 + (*c - '0'); c++; }
+    return (uint32_t)mm * 60000u + (uint32_t)ss * 1000u + (uint32_t)xx;
+}
+
+void AppMusic::clearLyrics() {
+    lyrics_.clear();
+    lyric_index_ = -1;
+    if (lyric_prev_) lv_label_set_text(lyric_prev_, "");
+    if (lyric_curr_) lv_label_set_text(lyric_curr_, "");
+    if (lyric_next_) lv_label_set_text(lyric_next_, "");
+}
+
+void AppMusic::loadLyricsForPath(const std::string& mp3_path) {
+    clearLyrics();
+    std::string lrc = replaceExtension(mp3_path, ".lrc");
+    File f = SD.open(lrc.c_str());
+    if (!f) return;
+    while (f.available()) {
+        String line = f.readStringUntil('\n');
+        line.trim();
+        if (line.length() == 0) continue;
+        std::string s = std::string(line.c_str());
+        size_t pos = 0;
+        std::vector<uint32_t> times;
+        while (true) {
+            size_t lb = s.find('[', pos);
+            if (lb == std::string::npos) break;
+            size_t rb = s.find(']', lb + 1);
+            if (rb == std::string::npos) break;
+            uint32_t t = parse_lrc_timestamp(s.c_str() + lb + 1, rb - lb - 1);
+            times.push_back(t);
+            pos = rb + 1;
+        }
+        size_t last_rb = s.rfind(']');
+        std::string text = last_rb != std::string::npos ? s.substr(last_rb + 1) : s;
+        if (text.size() == 0) continue;
+        for (auto t : times) {
+            lyrics_.push_back({t, text});
+        }
+    }
+    f.close();
+    if (!lyrics_.empty()) {
+        std::sort(lyrics_.begin(), lyrics_.end(), [](const LyricLine& a, const LyricLine& b){ return a.t < b.t; });
+    }
+}
+
+void AppMusic::updateLyrics(uint32_t elapsed_ms) {
+    if (lyrics_.empty()) return;
+    int idx = lyric_index_;
+    if (idx < 0 || (size_t)idx >= lyrics_.size() || elapsed_ms < lyrics_[idx].t || (idx + 1 < (int)lyrics_.size() && elapsed_ms >= lyrics_[idx + 1].t)) {
+        int lo = 0, hi = (int)lyrics_.size() - 1, ans = 0;
+        while (lo <= hi) {
+            int mid = (lo + hi) / 2;
+            if (lyrics_[mid].t <= elapsed_ms) { ans = mid; lo = mid + 1; }
+            else { hi = mid - 1; }
+        }
+        idx = ans;
+        lyric_index_ = idx;
+    }
+    const char* prev = idx > 0 ? lyrics_[idx - 1].s.c_str() : "";
+    const char* curr = lyrics_[idx].s.c_str();
+    const char* next = (idx + 1 < (int)lyrics_.size()) ? lyrics_[idx + 1].s.c_str() : "";
+    if (lyric_prev_) lv_label_set_text(lyric_prev_, prev);
+    if (lyric_curr_) lv_label_set_text(lyric_curr_, curr);
+    if (lyric_next_) lv_label_set_text(lyric_next_, next);
+}
+
