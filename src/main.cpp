@@ -12,9 +12,9 @@
 #include "lvgl_port.h"
 #include "input_kb.h"
 #include "window_system.h"
-#include "app_launcher.h"
-#include "app_theme_center.h"
-#include "app_settings.h"
+#include "apps/launcher/app_launcher.h"
+#include "apps/theme_center/app_theme_center.h"
+#include "apps/settings/app_settings.h"
 #include "theme.h"
 
 static WindowSystem g_wm;

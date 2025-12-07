@@ -2,22 +2,24 @@
  * @Author: ImLunchtime knoxmedia@yeah.net
  * @Date: 2025-11-08 18:13:39
  * @LastEditors: ImLunchtime knoxmedia@yeah.net
- * @LastEditTime: 2025-12-04 11:29:07
+ * @LastEditTime: 2025-12-07 10:44:09
  * @FilePath: \CardputerOS2_LVGL\src\app_launcher.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-#include "app_launcher.h"
-#include "app_music.h"
-#include "app_theme_center.h"
-#include "app_pictures.h"
-#include "app_devices.h"
-#include "app_bluetooth.h"
-#include "app_settings.h"
-#include "app_test.h"
-#include "app_circuitsim.h"
-#include "app_ux_editor.h"
-#include "app_ux_executor.h"
-#include "app_calculator.h"
+#include "apps/launcher/app_launcher.h"
+#include "apps/music/app_music.h"
+#include "apps/theme_center/app_theme_center.h"
+#include "apps/pictures/app_pictures.h"
+#include "apps/devices/app_devices.h"
+#include "apps/bluetooth/app_bluetooth.h"
+#include "apps/settings/app_settings.h"
+#include "apps/test/app_test.h"
+#include "apps/circuitsim/app_circuitsim.h"
+#include "apps/ux_editor/app_ux_editor.h"
+#include "apps/ux_executor/app_ux_executor.h"
+#include "apps/calculator/app_calculator.h"
+#include "apps/radiosim/app_radiosim.h"
+#include "apps/trainsim/app_trainsim.h"
 #include "theme.h"
 #include "input_kb.h"
 LV_IMG_DECLARE(icon_music_sd);
@@ -31,6 +33,8 @@ LV_IMG_DECLARE(icon_uxedit2);
 LV_IMG_DECLARE(icon_uxexec);
 LV_IMG_DECLARE(icon_settings);
 LV_IMG_DECLARE(icon_calculator);
+LV_IMG_DECLARE(icon_radio);
+LV_IMG_DECLARE(icon_train);
 
 static void on_music_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
@@ -98,6 +102,18 @@ static void on_calculator_item_event(lv_event_t* e) {
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchCalculator();
 }
 
+static void on_radiosim_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchRadioSim();
+}
+
+static void on_trainsim_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchTrainSim();
+}
+
 void AppLauncher::onOpen(lv_obj_t* window_root) {
     root_ = window_root;
     // Narrow window to fit 4x36px items
@@ -118,7 +134,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_radius(grid_, 0, 0);
     lv_obj_set_style_bg_opa(grid_, LV_OPA_TRANSP, 0);
     static lv_coord_t col_dsc[] = {36, 36, 36, 36, LV_GRID_TEMPLATE_LAST};
-    static lv_coord_t row_dsc[] = {36, 36, 36, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {36, 36, 36, 36, LV_GRID_TEMPLATE_LAST};
     lv_obj_set_grid_dsc_array(grid_, col_dsc, row_dsc);
 
     lv_obj_t* btn_music = lv_btn_create(grid_);
@@ -303,6 +319,38 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
         lv_img_set_src(img, &icon_calculator);
         lv_obj_center(img);
     }
+
+    lv_obj_t* btn_radiosim = lv_btn_create(grid_);
+    lv_obj_set_size(btn_radiosim, 36, 36);
+    lv_obj_set_style_bg_opa(btn_radiosim, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_radiosim, 0, 0);
+    lv_obj_set_style_radius(btn_radiosim, 0, 0);
+    lv_obj_set_style_shadow_width(btn_radiosim, 0, 0);
+    lv_obj_set_style_outline_width(btn_radiosim, 0, 0);
+    lv_obj_set_grid_cell(btn_radiosim, LV_GRID_ALIGN_CENTER, 3, 1, LV_GRID_ALIGN_CENTER, 2, 1);
+    items_.push_back({btn_radiosim, 3, 2});
+    lv_obj_add_event_cb(btn_radiosim, on_radiosim_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* img = lv_img_create(btn_radiosim);
+        lv_img_set_src(img, &icon_radio);
+        lv_obj_center(img);
+    }
+
+    lv_obj_t* btn_trainsim = lv_btn_create(grid_);
+    lv_obj_set_size(btn_trainsim, 36, 36);
+    lv_obj_set_style_bg_opa(btn_trainsim, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_trainsim, 0, 0);
+    lv_obj_set_style_radius(btn_trainsim, 0, 0);
+    lv_obj_set_style_shadow_width(btn_trainsim, 0, 0);
+    lv_obj_set_style_outline_width(btn_trainsim, 0, 0);
+    lv_obj_set_grid_cell(btn_trainsim, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 3, 1);
+    items_.push_back({btn_trainsim, 0, 3});
+    lv_obj_add_event_cb(btn_trainsim, on_trainsim_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* img = lv_img_create(btn_trainsim);
+        lv_img_set_src(img, &icon_train);
+        lv_obj_center(img);
+    }
 }
 
 void AppLauncher::launchMusic() { wm_.openApp(std::unique_ptr<IApp>(new AppMusic())); }
@@ -316,6 +364,8 @@ void AppLauncher::launchCircuitSim() { wm_.openApp(std::unique_ptr<IApp>(new App
 void AppLauncher::launchUXEditor() { wm_.openApp(std::unique_ptr<IApp>(new AppUXEditor())); }
 void AppLauncher::launchUXExecutor() { wm_.openApp(std::unique_ptr<IApp>(new AppUXExecutor(wm_))); }
 void AppLauncher::launchCalculator() { wm_.openApp(std::unique_ptr<IApp>(new AppCalculator())); }
+void AppLauncher::launchRadioSim() { wm_.openApp(std::unique_ptr<IApp>(new AppRadioSim())); }
+void AppLauncher::launchTrainSim() { wm_.openApp(std::unique_ptr<IApp>(new AppTrainSim())); }
 void AppLauncher::moveFocus(int dx, int dy) {
     int curc = -1, curr = -1;
     for (auto &it : items_) { if (lv_obj_has_state(it.obj, LV_STATE_FOCUSED)) { curc = it.col; curr = it.row; break; } }

@@ -1,5 +1,5 @@
-#include "app_ux_executor.h"
-#include "app_ux_runner.h"
+#include "apps/ux_executor/app_ux_executor.h"
+#include "apps/ux_runner/app_ux_runner.h"
 #include "theme.h"
 #include <vector>
 #include <unordered_map>

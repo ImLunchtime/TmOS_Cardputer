@@ -3,7 +3,7 @@
  * @Date: 2025-11-08 18:13:39
  * @LastEditors: ImLunchtime knoxmedia@yeah.net
  * @LastEditTime: 2025-12-03 13:25:16
- * @FilePath: \CardputerOS2_LVGL\src\app_launcher.h
+ * @FilePath: \CardputerOS2_LVGL\src\apps/launcher/app_launcher.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 #pragma once
@@ -35,6 +35,8 @@ public:
     void launchUXEditor();
     void launchUXExecutor();
     void launchCalculator();
+    void launchRadioSim();
+    void launchTrainSim();
 
 private:
     WindowSystem& wm_;
@@ -43,6 +45,6 @@ private:
     struct GridItem { lv_obj_t* obj; int col; int row; };
     std::vector<GridItem> items_;
     int cols_ = 4;
-    int rows_ = 3;
+    int rows_ = 4;
     void moveFocus(int dx, int dy);
 };

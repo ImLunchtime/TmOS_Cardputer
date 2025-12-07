@@ -1,4 +1,4 @@
-#include "app_ux_editor.h"
+#include "apps/ux_editor/app_ux_editor.h"
 #include <Arduino.h>
 #include <vector>
 #include <unordered_map>

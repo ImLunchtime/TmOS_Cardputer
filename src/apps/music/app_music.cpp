@@ -1,4 +1,4 @@
-#include "app_music.h"
+#include "apps/music/app_music.h"
 #include "theme.h"
 #include <algorithm>
 #include "input_kb.h"

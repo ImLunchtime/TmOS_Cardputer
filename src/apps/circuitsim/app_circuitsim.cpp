@@ -2,11 +2,11 @@
  * @Author: ImLunchtime knoxmedia@yeah.net
  * @Date: 2025-11-30 07:52:58
  * @LastEditors: ImLunchtime knoxmedia@yeah.net
- * @LastEditTime: 2025-11-30 10:50:12
+ * @LastEditTime: 2025-12-07 11:24:26
  * @FilePath: \CardputerOS2_LVGL\src\app_circuitsim.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-#include "app_circuitsim.h"
+#include "apps/circuitsim/app_circuitsim.h"
 LV_IMG_DECLARE(shield2);
 
 AppCircuitSim::AppCircuitSim() {}

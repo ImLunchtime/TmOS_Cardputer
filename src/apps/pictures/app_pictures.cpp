@@ -1,4 +1,4 @@
-#include "app_pictures.h"
+#include "apps/pictures/app_pictures.h"
 #include <lvgl.h>
 #include <M5Cardputer.h>
 #include <cstring>

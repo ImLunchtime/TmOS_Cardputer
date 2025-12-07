@@ -1,4 +1,4 @@
-#include "app_devices.h"
+#include "apps/devices/app_devices.h"
 
 AppDevices* AppDevices::s_instance_ = nullptr;
 
