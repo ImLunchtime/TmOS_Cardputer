@@ -70,4 +70,6 @@ private:
         EMERGENCY   // Emergency stop
     };
     State state_ = NOT_STARTED;
+    bool blink_toggle_ = false;
+    uint32_t last_blink_time_ = 0;
 };
