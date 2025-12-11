@@ -14,8 +14,6 @@
 #include "window_system.h"
 #include "SDFileManager.h"
 #include "apps/launcher/app_launcher.h"
-#include "apps/theme_center/app_theme_center.h"
-#include "apps/settings/app_settings.h"
 #include "theme.h"
 
 static WindowSystem g_wm;

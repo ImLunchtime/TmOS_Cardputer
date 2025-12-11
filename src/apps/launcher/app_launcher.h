@@ -25,8 +25,6 @@ public:
     void onClose() override;
 
     void launchMusic();
-    void launchThemeCenter();
-    void launchSettings();
     void launchTest();
     void launchDevices();
     void launchBluetooth();
@@ -36,7 +34,6 @@ public:
     void launchUXExecutor();
     void launchCalculator();
     void launchRadioSim();
-    void launchTrainSim();
     void launchStationReporter();
 
 private:
