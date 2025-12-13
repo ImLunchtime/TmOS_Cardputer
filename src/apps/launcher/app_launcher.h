@@ -35,6 +35,7 @@ public:
     void launchCalculator();
     void launchRadioSim();
     void launchStationReporter();
+    void launchBrightness();
 
 private:
     WindowSystem& wm_;

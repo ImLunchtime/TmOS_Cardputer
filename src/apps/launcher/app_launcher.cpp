@@ -18,6 +18,7 @@
 #include "apps/calculator/app_calculator.h"
 #include "apps/radiosim/app_radiosim.h"
 #include "apps/station_reporter/app_station_reporter.h"
+#include "apps/brightness/app_brightness.h"
 #include "theme.h"
 #include "input_kb.h"
 LV_IMG_DECLARE(icon_music_sd);
@@ -31,6 +32,12 @@ LV_IMG_DECLARE(icon_uxexec);
 LV_IMG_DECLARE(icon_calculator);
 LV_IMG_DECLARE(icon_radio);
 LV_IMG_DECLARE(icon_station_reporter);
+
+static void on_brightness_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchBrightness();
+}
 
 static void on_music_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
@@ -308,6 +315,22 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
         lv_img_set_src(img, &icon_station_reporter);
         lv_obj_center(img);
     }
+
+    lv_obj_t* btn_brightness = lv_btn_create(grid_);
+    lv_obj_set_size(btn_brightness, 36, 36);
+    lv_obj_set_style_bg_opa(btn_brightness, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_brightness, 0, 0);
+    lv_obj_set_style_radius(btn_brightness, 0, 0);
+    lv_obj_set_style_shadow_width(btn_brightness, 0, 0);
+    lv_obj_set_style_outline_width(btn_brightness, 0, 0);
+    lv_obj_set_grid_cell(btn_brightness, LV_GRID_ALIGN_CENTER, 3, 1, LV_GRID_ALIGN_CENTER, 2, 1);
+    items_.push_back({btn_brightness, 3, 2});
+    lv_obj_add_event_cb(btn_brightness, on_brightness_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* lbl = lv_label_create(btn_brightness);
+        lv_label_set_text(lbl, "亮度");
+        lv_obj_center(lbl);
+    }
 }
 
 void AppLauncher::launchMusic() { wm_.openApp(std::unique_ptr<IApp>(new AppMusic())); }
@@ -322,6 +345,7 @@ void AppLauncher::launchUXExecutor() { wm_.openApp(std::unique_ptr<IApp>(new App
 void AppLauncher::launchCalculator() { wm_.openApp(std::unique_ptr<IApp>(new AppCalculator())); }
 void AppLauncher::launchRadioSim() { wm_.openApp(std::unique_ptr<IApp>(new AppRadioSim())); }
 void AppLauncher::launchStationReporter() { wm_.openApp(std::unique_ptr<IApp>(new AppStationReporter())); }
+void AppLauncher::launchBrightness() { wm_.openApp(std::unique_ptr<IApp>(new AppBrightness())); }
 void AppLauncher::moveFocus(int dx, int dy) {
     int curc = -1, curr = -1;
     for (auto &it : items_) { if (lv_obj_has_state(it.obj, LV_STATE_FOCUSED)) { curc = it.col; curr = it.row; break; } }
