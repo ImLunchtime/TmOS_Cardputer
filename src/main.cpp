@@ -15,6 +15,7 @@
 #include "SDFileManager.h"
 #include "apps/launcher/app_launcher.h"
 #include "theme.h"
+#include "globals.h"
 
 static WindowSystem g_wm;
 
@@ -25,6 +26,8 @@ void setup() {
     M5Cardputer.begin(cfg, true);
     M5Cardputer.Keyboard.begin();
     M5.begin(cfg);
+
+    globals::init_defaults();
 
     // Initialize SD Card
     static SDFileManager sd_manager;

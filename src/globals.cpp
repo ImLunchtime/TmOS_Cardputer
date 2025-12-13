@@ -2,7 +2,7 @@
 
 namespace globals {
 
-static int s_brightness_level = 9;
+static int s_brightness_level = 5;
 
 int get_brightness_level() {
     return s_brightness_level;
