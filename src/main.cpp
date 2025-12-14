@@ -17,6 +17,7 @@
 #include "theme.h"
 #include "globals.h"
 #include "ui_status_bar.h"
+#include "wifi_manager.h"
 
 static WindowSystem g_wm;
 
@@ -48,6 +49,7 @@ void setup() {
 
     // Initialize window system and auto-open launcher
     g_wm.openApp(std::unique_ptr<IApp>(new AppLauncher(g_wm)));
+    wifi_manager::init();
 }
 
 void loop() {
@@ -63,6 +65,7 @@ void loop() {
     lv_timer_handler();
     // Drive window system: only active app runs
     g_wm.update();
+    wifi_manager::update();
     // Relax the loop to reduce CPU usage
     delay(5);
     yield();

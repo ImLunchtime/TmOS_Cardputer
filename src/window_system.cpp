@@ -128,6 +128,13 @@ void WindowSystem::applyActiveState() {
             if (win.group) kb_set_indev_group(win.group);
             else kb_set_indev_group(kb_get_group());
             kb_set_active_app(win.app.get());
+            if (win.group) {
+                lv_obj_t* focused = lv_group_get_focused(win.group);
+                if (!focused || !lv_obj_is_valid(focused) || lv_obj_has_flag(focused, LV_OBJ_FLAG_HIDDEN)) {
+                    lv_obj_t* first = find_first_focusable(win.root);
+                    if (first) lv_group_focus_obj(first);
+                }
+            }
         } else {
             // Background window: disable
             lv_obj_add_state(win.root, LV_STATE_DISABLED);

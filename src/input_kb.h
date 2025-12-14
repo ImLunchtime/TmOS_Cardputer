@@ -15,6 +15,9 @@ lv_indev_t* kb_get_indev();
 lv_group_t* kb_get_group();
 lv_group_t* kb_get_current_group();
 void kb_set_indev_group(lv_group_t* group);
+// Navigation control
+void kb_set_nav_disabled(bool disabled);
+bool kb_is_nav_disabled();
 void kb_process_hardware_keys();
 bool kb_consume_exit_requested();
 

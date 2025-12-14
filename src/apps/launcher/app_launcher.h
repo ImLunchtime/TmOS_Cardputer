@@ -36,6 +36,7 @@ public:
     void launchRadioSim();
     void launchStationReporter();
     void launchBrightness();
+    void launchWiFi();
 
 private:
     WindowSystem& wm_;

@@ -1,6 +1,7 @@
 #include "ui_status_bar.h"
 #include <M5Cardputer.h>
 #include "theme.h"
+#include "wifi_manager.h"
 
 namespace ui_status_bar {
 static lv_obj_t* s_bar = nullptr;
@@ -15,7 +16,12 @@ static void update() {
         lv_label_set_text_fmt(s_label, "%d%% %dmV", lvl, mv);
     }
     if (s_icon) {
-        lv_label_set_text(s_icon, LV_SYMBOL_BATTERY_FULL);
+        lv_label_set_text(s_icon, LV_SYMBOL_WIFI);
+        if (wifi_manager::is_connected()) {
+            lv_obj_set_style_text_color(s_icon, lv_color_hex(0x66CC66), 0);
+        } else {
+            lv_obj_set_style_text_color(s_icon, lv_color_hex(0xFF6666), 0);
+        }
     }
 }
 

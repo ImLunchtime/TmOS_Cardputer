@@ -19,6 +19,7 @@ static std::vector<uint16_t> key_queue;
 static uint16_t current_key = 0;
 static bool emit_release_next = false;
 static volatile bool g_exit_requested = false;
+static bool g_nav_disabled = false;
 
 static IApp* g_active_app = nullptr;
 struct RegKey { uint16_t key; std::function<bool()> is_active; std::function<void()> on_press; };
@@ -80,6 +81,8 @@ void kb_set_indev_group(lv_group_t* group) {
     kb_current_group = group;
     if (kb_indev) lv_indev_set_group(kb_indev, group);
 }
+void kb_set_nav_disabled(bool disabled) { g_nav_disabled = disabled; }
+bool kb_is_nav_disabled() { return g_nav_disabled; }
 
 void kb_set_active_app(IApp* app) { g_active_app = app; }
 void kb_register_app_keys(IApp* owner, const std::vector<AppCustomKey>& keys) {
@@ -105,20 +108,28 @@ void kb_process_hardware_keys() {
             }
 
             if (M5Cardputer.Keyboard.isKeyPressed(KEY_TAB)) {
-                uint16_t k = status.shift ? LV_KEY_PREV : LV_KEY_NEXT;
-                if (!try_handle_custom('\t')) {
-                    key_queue.push_back(k);
+                if (!g_nav_disabled) {
+                    uint16_t k = status.shift ? LV_KEY_PREV : LV_KEY_NEXT;
+                    if (!try_handle_custom('\t')) {
+                        key_queue.push_back(k);
+                    }
+                } else {
+                    if (!try_handle_custom('\t')) {
+                        key_queue.push_back('\t');
+                    }
                 }
             }
 
             for (auto c : status.word) {
                 // Skip TAB character to avoid duplicate LV_KEY_NEXT events
                 if (c == '\t') continue;
-                // Map punctuation to navigation keys regardless of FN state
-                if (c == ';')       { if (!try_handle_custom(';')) key_queue.push_back(LV_KEY_PREV);  continue; }
-                if (c == ',')       { if (!try_handle_custom(',')) key_queue.push_back(LV_KEY_LEFT);  continue; }
-                if (c == '.')       { if (!try_handle_custom('.')) key_queue.push_back(LV_KEY_NEXT);  continue; }
-                if (c == '/')       { if (!try_handle_custom('/')) key_queue.push_back(LV_KEY_RIGHT); continue; }
+                // Map punctuation to navigation keys unless navigation is disabled
+                if (!g_nav_disabled) {
+                    if (c == ';')       { if (!try_handle_custom(';')) key_queue.push_back(LV_KEY_PREV);  continue; }
+                    if (c == ',')       { if (!try_handle_custom(',')) key_queue.push_back(LV_KEY_LEFT);  continue; }
+                    if (c == '.')       { if (!try_handle_custom('.')) key_queue.push_back(LV_KEY_NEXT);  continue; }
+                    if (c == '/')       { if (!try_handle_custom('/')) key_queue.push_back(LV_KEY_RIGHT); continue; }
+                }
                 if (c == '`')       { if (!try_handle_custom('`')) g_exit_requested = true; continue; }
                 // Default: enqueue ASCII character for text input
                 if (!try_handle_custom(static_cast<uint8_t>(c))) {
