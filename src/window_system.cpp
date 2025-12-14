@@ -130,7 +130,7 @@ void WindowSystem::applyActiveState() {
             kb_set_active_app(win.app.get());
             if (win.group) {
                 lv_obj_t* focused = lv_group_get_focused(win.group);
-                if (!focused || !lv_obj_is_valid(focused) || lv_obj_has_flag(focused, LV_OBJ_FLAG_HIDDEN)) {
+                if (!focused || !lv_obj_is_valid(focused) || lv_obj_has_flag(focused, LV_OBJ_FLAG_HIDDEN) || lv_obj_has_state(focused, LV_STATE_DISABLED)) {
                     lv_obj_t* first = find_first_focusable(win.root);
                     if (first) lv_group_focus_obj(first);
                 }
