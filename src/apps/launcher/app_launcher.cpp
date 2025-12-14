@@ -32,6 +32,7 @@ LV_IMG_DECLARE(icon_uxexec);
 LV_IMG_DECLARE(icon_calculator);
 LV_IMG_DECLARE(icon_radio);
 LV_IMG_DECLARE(icon_station_reporter);
+LV_IMG_DECLARE(icon_brightness);
 
 static void on_brightness_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
@@ -327,9 +328,9 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     items_.push_back({btn_brightness, 3, 2});
     lv_obj_add_event_cb(btn_brightness, on_brightness_item_event, LV_EVENT_CLICKED, this);
     {
-        lv_obj_t* lbl = lv_label_create(btn_brightness);
-        lv_label_set_text(lbl, "亮度");
-        lv_obj_center(lbl);
+        lv_obj_t* img = lv_img_create(btn_brightness);
+        lv_img_set_src(img, &icon_brightness);
+        lv_obj_center(img);
     }
 }
 
