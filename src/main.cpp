@@ -16,6 +16,7 @@
 #include "apps/launcher/app_launcher.h"
 #include "theme.h"
 #include "globals.h"
+#include "ui_status_bar.h"
 
 static WindowSystem g_wm;
 
@@ -42,6 +43,7 @@ void setup() {
     ui_theme::init();
     // Create wallpaper behind windows
     ui_theme::create_wallpaper();
+    ui_status_bar::init();
     // Drive LVGL from loop() to avoid cross-thread races
 
     // Initialize window system and auto-open launcher
