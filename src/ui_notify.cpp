@@ -9,7 +9,7 @@ static void anim_exec_y(void* obj, int32_t v) { lv_obj_set_y((lv_obj_t*)obj, v);
 
 static void ensure_container() {
     if (s_cont && lv_obj_is_valid(s_cont)) return;
-    s_cont = lv_obj_create(lv_scr_act());
+    s_cont = lv_obj_create(lv_layer_top());
     lv_obj_set_size(s_cont, 120, 40);
     lv_obj_set_style_radius(s_cont, 0, 0);
     lv_obj_set_style_bg_color(s_cont, lv_color_hex(0xFFFFFF), 0);

@@ -94,7 +94,7 @@ void apply_on_startup() {
         const char* ssid = wifi["ssid"] | "";
         const char* password = wifi["password"] | "";
         if (ssid && ssid[0]) {
-            String msg = String("Auto-connecting WiFi: ") + ssid;
+            String msg = String("Connecting WiFi ") + ssid;
             ui_notify::showSymbol(LV_SYMBOL_WIFI, msg.c_str(), 2500);
             wifi_manager::connect(ssid, password);
         }
