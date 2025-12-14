@@ -2,6 +2,7 @@
 #include "theme.h"
 #include "input_kb.h"
 #include <SD.h>
+#include "ui_notify.h"
 
 void AppMusic::onOpen(lv_obj_t* window_root) {
     root_ = window_root;
@@ -14,9 +15,9 @@ void AppMusic::onOpen(lv_obj_t* window_root) {
 
     buildUI(root_);
 
-    // Initialize SD with board-specific SPI pins
     if (!sd_.initialize()) {
-        updateStatus("SD init failed");
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "无法读取SD卡", 2500);
+        updateStatus("无法读取SD卡");
         return;
     }
 
