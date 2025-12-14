@@ -2,6 +2,7 @@
 #include "theme.h"
 #include "ui_notify.h"
 #include "input_kb.h"
+#include "config_manager.h"
 
 AppWiFi::AppWiFi() {}
 AppWiFi::~AppWiFi() {}
@@ -58,6 +59,7 @@ void AppWiFi::onTick() {
         lv_label_set_text(label_status_, msg.c_str());
         if (connecting_) {
             ui_notify::showSymbol(LV_SYMBOL_OK, "WiFi connected", 2000);
+            config_manager::save_wifi(wifi_manager::connected_ssid().c_str(), last_password_.c_str());
             connecting_ = false;
         }
     } else if (st == wifi_manager::State::Failed) {
@@ -266,6 +268,7 @@ void AppWiFi::on_list_item(lv_event_t* e) {
     app->show_connect_panel(n.ssid, n.secure);
     if (!n.secure) {
         wifi_manager::connect(n.ssid.c_str(), "");
+        app->last_password_ = "";
         app->connecting_ = true;
         ui_notify::showSymbol(LV_SYMBOL_WIFI, "Connecting...", 1500);
     }
@@ -275,6 +278,7 @@ void AppWiFi::on_connect(lv_event_t* e) {
     AppWiFi* app = (AppWiFi*)lv_event_get_user_data(e);
     if (!app) return;
     const char* pw = lv_textarea_get_text(app->ta_password_);
+    app->last_password_ = pw ? pw : "";
     wifi_manager::connect(app->selected_ssid_.c_str(), pw);
     app->connecting_ = true;
     app->hide_connect_panel();

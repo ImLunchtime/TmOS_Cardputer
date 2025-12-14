@@ -18,6 +18,7 @@
 #include "globals.h"
 #include "ui_status_bar.h"
 #include "wifi_manager.h"
+#include "config_manager.h"
 
 static WindowSystem g_wm;
 
@@ -45,11 +46,9 @@ void setup() {
     // Create wallpaper behind windows
     ui_theme::create_wallpaper();
     ui_status_bar::init();
-    // Drive LVGL from loop() to avoid cross-thread races
-
-    // Initialize window system and auto-open launcher
-    g_wm.openApp(std::unique_ptr<IApp>(new AppLauncher(g_wm)));
     wifi_manager::init();
+    config_manager::apply_on_startup();
+    g_wm.openApp(std::unique_ptr<IApp>(new AppLauncher(g_wm)));
 }
 
 void loop() {

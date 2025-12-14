@@ -43,6 +43,7 @@ private:
 
     std::vector<wifi_manager::Network> networks_;
     String selected_ssid_;
+    String last_password_;
     bool connecting_ = false;
     std::unordered_map<lv_obj_t*, int> item_index_;
     lv_timer_t* timer_scan_ = nullptr;

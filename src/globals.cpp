@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "config_manager.h"
 
 namespace globals {
 
@@ -14,6 +15,7 @@ void set_brightness_level(int level) {
     s_brightness_level = level;
     int raw = level_to_raw(level);
     M5Cardputer.Display.setBrightness(raw);
+    config_manager::save_brightness(s_brightness_level);
 }
 
 void init_defaults() { M5Cardputer.Display.setBrightness(level_to_raw(s_brightness_level)); }
