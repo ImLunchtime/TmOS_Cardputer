@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <unordered_map>
+#include "ui_notify.h"
 
 static void on_new(lv_event_t* e) { auto* app = (AppUXEditor*)lv_event_get_user_data(e); if (app) app->create_new(); }
 static void on_save(lv_event_t* e) { auto* app = (AppUXEditor*)lv_event_get_user_data(e); if (app) app->save_current(); }
@@ -16,12 +17,14 @@ static void on_list_click(lv_event_t* e) {
 static void on_fab_new(lv_event_t* e) { auto* app = (AppUXEditor*)lv_event_get_user_data(e); if (!app) return; app->create_new(); app->show_edit_page(); }
 
 void AppUXEditor::refresh_list() {
-    if (!fm_.initialize()) return;
+    if (!fm_.initialize()) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "SD初始化失败", 2500); return; }
     const int MAX = 256;
     files_cache_.clear();
     files_cache_.resize(MAX);
     int cnt = 0;
-    fm_.scanAllFiles(files_cache_.data(), cnt, MAX, String(".uxc"));
+    if (!fm_.scanAllFiles(files_cache_.data(), cnt, MAX, String(".uxc"))) {
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "扫描文件失败", 2500);
+    }
     files_cache_.resize(cnt);
     current_path_ = "";
     if (list_) {
@@ -42,15 +45,16 @@ void AppUXEditor::refresh_list() {
 }
 
 void AppUXEditor::load_selected() {
-    if (!fm_.initialize()) return;
+    if (!fm_.initialize()) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "SD初始化失败", 2500); return; }
     String target = current_path_;
     if (target.length() == 0) return;
     String content = fm_.readFile(target);
+    if (content.length() == 0) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "读取失败", 2500); }
     lv_textarea_set_text(editor_, content.c_str());
 }
 
 void AppUXEditor::create_new() {
-    if (!fm_.initialize()) return;
+    if (!fm_.initialize()) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "SD初始化失败", 2500); return; }
     String name = String("ux_") + String(millis()) + String(".uxc");
     String path = String("/") + name;
     String tpl = String("{\n")
@@ -61,27 +65,27 @@ void AppUXEditor::create_new() {
         + String("    { \"type\": \"button\", \"text\": \"Click\", \"on\": { \"click\": { \"action\": \"toast\", \"text\": \"Clicked!\" } } }\n")
         + String("  ]\n")
         + String("}\n");
-    fm_.createFile(path, tpl);
+    if (!fm_.createFile(path, tpl)) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "创建失败", 2500); }
     refresh_list();
     current_path_ = path;
     lv_textarea_set_text(editor_, tpl.c_str());
 }
 
 void AppUXEditor::save_current() {
-    if (!fm_.initialize()) return;
+    if (!fm_.initialize()) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "SD初始化失败", 2500); return; }
     String content = String(lv_textarea_get_text(editor_));
     if (current_path_.length() == 0) {
         create_new();
-        fm_.writeFile(current_path_, content);
+        if (!fm_.writeFile(current_path_, content)) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "保存失败", 2500); }
     } else {
-        fm_.writeFile(current_path_, content);
+        if (!fm_.writeFile(current_path_, content)) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "保存失败", 2500); }
     }
 }
 
 void AppUXEditor::delete_current() {
-    if (!fm_.initialize()) return;
+    if (!fm_.initialize()) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "SD初始化失败", 2500); return; }
     if (current_path_.length() == 0) return;
-    fm_.deletePath(current_path_);
+    if (!fm_.deletePath(current_path_)) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "删除失败", 2500); }
     current_path_ = "";
     lv_textarea_set_text(editor_, "");
     refresh_list();
@@ -100,6 +104,7 @@ void AppUXEditor::debug_current() {
             String msg = String("Error: ") + r.error;
             lv_label_set_text(status_label_, msg.c_str());
             lv_obj_set_style_text_color(status_label_, lv_color_hex(0xFF6666), 0);
+            ui_notify::showSymbol(LV_SYMBOL_WARNING, msg.c_str(), 2500);
         }
     }
 }

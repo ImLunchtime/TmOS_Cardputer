@@ -31,11 +31,13 @@ static void start_appear_anim(uint32_t time_ms = 180) {
     lv_obj_align(s_cont, LV_ALIGN_BOTTOM_RIGHT, -2, -2);
     int tx = lv_obj_get_x(s_cont);
     int ty = lv_obj_get_y(s_cont);
-    lv_obj_set_pos(s_cont, tx + 20, ty + 20);
+    lv_coord_t w = lv_obj_get_width(s_cont);
+    lv_coord_t h = lv_obj_get_height(s_cont);
+    lv_obj_set_pos(s_cont, tx + w + 10, ty + h + 10);
     lv_anim_t ax;
     lv_anim_init(&ax);
     lv_anim_set_var(&ax, s_cont);
-    lv_anim_set_values(&ax, tx + 20, tx);
+    lv_anim_set_values(&ax, tx + w + 10, tx);
     lv_anim_set_time(&ax, time_ms);
     lv_anim_set_exec_cb(&ax, anim_exec_x);
     lv_anim_set_path_cb(&ax, lv_anim_path_ease_out);
@@ -43,7 +45,7 @@ static void start_appear_anim(uint32_t time_ms = 180) {
     lv_anim_t ay;
     lv_anim_init(&ay);
     lv_anim_set_var(&ay, s_cont);
-    lv_anim_set_values(&ay, ty + 20, ty);
+    lv_anim_set_values(&ay, ty + h + 10, ty);
     lv_anim_set_time(&ay, time_ms);
     lv_anim_set_exec_cb(&ay, anim_exec_y);
     lv_anim_set_path_cb(&ay, lv_anim_path_ease_out);
@@ -65,10 +67,12 @@ static void start_disappear_anim(uint32_t time_ms = 150) {
     if (!s_cont) return;
     int sx = lv_obj_get_x(s_cont);
     int sy = lv_obj_get_y(s_cont);
+    lv_coord_t hor = lv_disp_get_hor_res(NULL);
+    lv_coord_t ver = lv_disp_get_ver_res(NULL);
     lv_anim_t ax;
     lv_anim_init(&ax);
     lv_anim_set_var(&ax, s_cont);
-    lv_anim_set_values(&ax, sx, sx + 20);
+    lv_anim_set_values(&ax, sx, hor + 10);
     lv_anim_set_time(&ax, time_ms);
     lv_anim_set_exec_cb(&ax, anim_exec_x);
     lv_anim_set_path_cb(&ax, lv_anim_path_ease_in);
@@ -76,7 +80,7 @@ static void start_disappear_anim(uint32_t time_ms = 150) {
     lv_anim_t ay;
     lv_anim_init(&ay);
     lv_anim_set_var(&ay, s_cont);
-    lv_anim_set_values(&ay, sy, sy + 20);
+    lv_anim_set_values(&ay, sy, ver + 10);
     lv_anim_set_time(&ay, time_ms);
     lv_anim_set_exec_cb(&ay, anim_exec_y);
     lv_anim_set_path_cb(&ay, lv_anim_path_ease_in);

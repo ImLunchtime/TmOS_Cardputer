@@ -2,6 +2,7 @@
 #include "theme.h"
 #include "input_kb.h"
 #include <lvgl.h>
+#include "ui_notify.h"
 
 void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_flex_flow(parent, LV_FLEX_FLOW_COLUMN);
@@ -348,6 +349,12 @@ void AppMusic::updateUIFromAudioStatus() {
         }
         if (audioStatus_.hasError && strlen(audioStatus_.errorMessage) > 0) {
             updateStatus(audioStatus_.errorMessage);
+            if (!error_notified_) {
+                ui_notify::showSymbol(LV_SYMBOL_WARNING, audioStatus_.errorMessage, 2500);
+                error_notified_ = true;
+            }
+        } else {
+            error_notified_ = false;
         }
         xSemaphoreGive(audioStatusMutex_);
     }

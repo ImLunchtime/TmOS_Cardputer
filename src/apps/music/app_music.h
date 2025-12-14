@@ -153,6 +153,7 @@ private:
     SemaphoreHandle_t audioStatusMutex_ = nullptr;
     AudioStatus audioStatus_;
     bool audio_initialized_ = false;
+    bool error_notified_ = false;
 
     // UI helpers
     void buildUI(lv_obj_t* parent);

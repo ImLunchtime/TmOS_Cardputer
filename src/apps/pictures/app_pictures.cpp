@@ -4,6 +4,7 @@
 #include <cstring>
 #include <MD5Builder.h>
 #include "input_kb.h"
+#include "ui_notify.h"
 
 AppPictures::AppPictures() {}
 AppPictures::~AppPictures() {}
@@ -15,7 +16,7 @@ void AppPictures::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_pad_row(root_, 6, 0);
     lv_obj_set_style_text_font(root_, ui_theme::get_system_font(), 0);
 
-    fm_.initialize();
+    if (!fm_.initialize()) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "SD初始化失败", 2500); }
 
     files_.clear();
     const int kMax = 256;
@@ -200,6 +201,7 @@ void AppPictures::show_image(int idx) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "无法打开图片文件");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "无法打开图片文件", 2500);
         return;
     }
     size_t n = f.size();
@@ -209,6 +211,7 @@ void AppPictures::show_image(int idx) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "图片格式错误");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "图片格式错误", 2500);
         return;
     }
     uint8_t hdr[4];
@@ -219,6 +222,7 @@ void AppPictures::show_image(int idx) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "读取图片头失败");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "读取图片头失败", 2500);
         return;
     }
     uint32_t h32 = (uint32_t)hdr[0] | ((uint32_t)hdr[1] << 8) | ((uint32_t)hdr[2] << 16) | ((uint32_t)hdr[3] << 24);
@@ -231,6 +235,7 @@ void AppPictures::show_image(int idx) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "图片尺寸无效");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "图片尺寸无效", 2500);
         return;
     }
     if (cf != LV_IMG_CF_TRUE_COLOR) {
@@ -240,6 +245,7 @@ void AppPictures::show_image(int idx) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "当前仅支持RGB565 TRUE_COLOR");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "仅支持RGB565 TRUE_COLOR", 2500);
         return;
     }
     size_t data_sz = (size_t)w * (size_t)h * 2;
@@ -249,6 +255,7 @@ void AppPictures::show_image(int idx) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "图片数据长度不匹配");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "图片数据长度不匹配", 2500);
         return;
     }
     img_dsc_.header.always_zero = 0;
@@ -264,6 +271,7 @@ void AppPictures::show_image(int idx) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "内存不足，无法显示图片");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "内存不足，无法显示图片", 2500);
         return;
     }
     size_t rimg = f.read(img_buf_, img_dsc_.data_size);
@@ -273,6 +281,7 @@ void AppPictures::show_image(int idx) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "读取图片数据失败");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "读取图片数据失败", 2500);
         return;
     }
     img_dsc_.data = (const uint8_t*)img_buf_;
@@ -511,6 +520,7 @@ void AppPictures::show_encrypted_image(const String& path) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "无法打开图片文件");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "无法打开图片文件", 2500);
         return;
     }
     size_t n = f.size();
@@ -520,6 +530,7 @@ void AppPictures::show_encrypted_image(const String& path) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "图片格式错误");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "图片格式错误", 2500);
         return;
     }
     uint8_t hdr[4];
@@ -530,6 +541,7 @@ void AppPictures::show_encrypted_image(const String& path) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "读取图片头失败");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "读取图片头失败", 2500);
         return;
     }
     uint32_t h32 = (uint32_t)hdr[0] | ((uint32_t)hdr[1] << 8) | ((uint32_t)hdr[2] << 16) | ((uint32_t)hdr[3] << 24);
@@ -574,6 +586,7 @@ void AppPictures::show_encrypted_image(const String& path) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "内存不足，无法显示图片");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "内存不足，无法显示图片", 2500);
         return;
     }
     size_t rimg = f.read(img_buf_, img_dsc_.data_size);
@@ -583,6 +596,7 @@ void AppPictures::show_encrypted_image(const String& path) {
         lv_obj_clear_flag(info_label_, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(info_label_, "读取图片数据失败");
         lv_obj_center(info_label_);
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "读取图片数据失败", 2500);
         return;
     }
     img_dsc_.data = (const uint8_t*)img_buf_;

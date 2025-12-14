@@ -3,6 +3,7 @@
 #include <SD.h>
 #include <ArduinoJson.h>
 #include "theme.h"
+#include "ui_notify.h"
 
 void AppStationReporter::buildTab1(lv_obj_t* parent) {
     lv_obj_set_flex_flow(parent, LV_FLEX_FLOW_COLUMN);
@@ -126,16 +127,16 @@ void AppStationReporter::loadRouteList() {
     available_routes_.clear();
     lv_obj_clean(list_routes_);
 
-    if (!SD.exists("/bus_routes/routes.json")) return;
+    if (!SD.exists("/bus_routes/routes.json")) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "routes.json不存在", 2500); return; }
 
     File file = SD.open("/bus_routes/routes.json");
-    if (!file) return;
+    if (!file) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "无法打开routes.json", 2500); return; }
 
     DynamicJsonDocument doc(4096);
     DeserializationError error = deserializeJson(doc, file);
     file.close();
 
-    if (error) return;
+    if (error) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "JSON解析失败", 2500); return; }
 
     audio_template_.clear();
     if (doc.containsKey("audio_template")) {
@@ -181,12 +182,14 @@ void AppStationReporter::refreshTipsButtons() {
 void AppStationReporter::loadRoute(const String& filename) {
     if (!SD.exists(filename)) {
         lv_label_set_text(label_route_name_, "File not found");
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "文件不存在", 2500);
         return;
     }
 
     File file = SD.open(filename);
     if (!file) {
         lv_label_set_text(label_route_name_, "Read error");
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "读取失败", 2500);
         return;
     }
 
@@ -198,6 +201,7 @@ void AppStationReporter::loadRoute(const String& filename) {
         String err = "JSON Error: ";
         err += error.c_str();
         lv_label_set_text(label_route_name_, err.c_str());
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, err.c_str(), 2500);
         return;
     }
 

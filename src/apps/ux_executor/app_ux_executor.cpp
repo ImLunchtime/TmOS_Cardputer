@@ -3,6 +3,7 @@
 #include "theme.h"
 #include <vector>
 #include <unordered_map>
+#include "ui_notify.h"
 
 static void on_item_clicked(lv_event_t* e) {
     AppUXExecutor* app = (AppUXExecutor*)lv_event_get_user_data(e);
@@ -12,12 +13,14 @@ static void on_item_clicked(lv_event_t* e) {
 }
 
 void AppUXExecutor::refresh_list() {
-    if (!fm_.initialize()) return;
+    if (!fm_.initialize()) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "SD初始化失败", 2500); return; }
     files_.clear();
     const int MAX = 256;
     std::vector<FileInfo> tmp(MAX);
     int cnt = 0;
-    fm_.scanAllFiles(tmp.data(), cnt, MAX, String(".uxc"));
+    if (!fm_.scanAllFiles(tmp.data(), cnt, MAX, String(".uxc"))) {
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "扫描文件失败", 2500);
+    }
     for (int i = 0; i < cnt; ++i) files_.push_back(tmp[i]);
     item_index_.clear();
     if (!list_) return;
