@@ -26,7 +26,7 @@ LV_IMG_DECLARE(icon_test);
 LV_IMG_DECLARE(icon_devices);
 LV_IMG_DECLARE(icon_bluetooth);
 LV_IMG_DECLARE(icon_pictures);
-LV_IMG_DECLARE(icon_circuitsim);
+LV_IMG_DECLARE(icon_circuitsim2);
 LV_IMG_DECLARE(icon_uxedit2);
 LV_IMG_DECLARE(icon_uxexec);
 LV_IMG_DECLARE(icon_calculator);
@@ -225,7 +225,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_add_event_cb(btn_circuitsim, on_circuitsim_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_circuitsim);
-        lv_img_set_src(img, &icon_circuitsim);
+        lv_img_set_src(img, &icon_circuitsim2);
         lv_obj_center(img);
     }
 
