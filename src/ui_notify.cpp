@@ -10,7 +10,7 @@ static void anim_exec_y(void* obj, int32_t v) { lv_obj_set_y((lv_obj_t*)obj, v);
 static void ensure_container() {
     if (s_cont && lv_obj_is_valid(s_cont)) return;
     s_cont = lv_obj_create(lv_layer_top());
-    lv_obj_set_size(s_cont, 120, 40);
+    lv_obj_set_size(s_cont, 132, LV_SIZE_CONTENT);
     lv_obj_set_style_radius(s_cont, 0, 0);
     lv_obj_set_style_bg_color(s_cont, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_bg_opa(s_cont, LV_OPA_COVER, 0);
@@ -112,7 +112,7 @@ void ui_notify::showText(const char* text, uint32_t duration_ms) {
     lv_obj_set_flex_flow(s_cont, LV_FLEX_FLOW_ROW);
     lv_obj_t* lbl = lv_label_create(s_cont);
     lv_obj_set_style_text_color(lbl, lv_color_hex(0x000000), 0);
-    lv_label_set_long_mode(lbl, LV_LABEL_LONG_DOT);
+    lv_label_set_long_mode(lbl, LV_LABEL_LONG_WRAP);
     lv_obj_set_width(lbl, LV_PCT(100));
     lv_obj_set_flex_grow(lbl, 1);
     lv_label_set_text(lbl, text ? text : "");
@@ -131,7 +131,8 @@ void ui_notify::showSymbol(const char* symbol, const char* text, uint32_t durati
     lv_obj_set_style_pad_right(sym, 4, 0);
     lv_obj_t* lbl = lv_label_create(s_cont);
     lv_obj_set_style_text_color(lbl, lv_color_hex(0x000000), 0);
-    lv_label_set_long_mode(lbl, LV_LABEL_LONG_DOT);
+    lv_label_set_long_mode(lbl, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(lbl, LV_PCT(100));
     lv_obj_set_flex_grow(lbl, 1);
     lv_label_set_text(lbl, text ? text : "");
     lv_obj_move_foreground(s_cont);
@@ -149,7 +150,8 @@ void ui_notify::showImage(const lv_img_dsc_t* img, const char* text, uint32_t du
     lv_obj_set_style_pad_right(icon, 4, 0);
     lv_obj_t* lbl = lv_label_create(s_cont);
     lv_obj_set_style_text_color(lbl, lv_color_hex(0x000000), 0);
-    lv_label_set_long_mode(lbl, LV_LABEL_LONG_DOT);
+    lv_label_set_long_mode(lbl, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(lbl, LV_PCT(100));
     lv_obj_set_flex_grow(lbl, 1);
     lv_label_set_text(lbl, text ? text : "");
     lv_obj_move_foreground(s_cont);
