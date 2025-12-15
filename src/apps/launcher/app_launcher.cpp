@@ -8,6 +8,7 @@
  */
 #include "apps/launcher/app_launcher.h"
 #include "apps/music/app_music.h"
+#include "apps/music_downloader/app_music_downloader.h"
 #include "apps/pictures/app_pictures.h"
 #include "apps/devices/app_devices.h"
 #include "apps/bluetooth/app_bluetooth.h"
@@ -46,6 +47,12 @@ static void on_music_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
     if (!launcher) return;
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchMusic();
+}
+
+static void on_music_dl_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchMusicDownloader();
 }
 
 
@@ -356,9 +363,27 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
         lv_img_set_src(img, &icon_wifi);
         lv_obj_center(img);
     }
+
+    lv_obj_t* btn_music_dl = lv_btn_create(grid_);
+    lv_obj_set_size(btn_music_dl, 36, 36);
+    lv_obj_set_style_bg_opa(btn_music_dl, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_music_dl, 0, 0);
+    lv_obj_set_style_radius(btn_music_dl, 0, 0);
+    lv_obj_set_style_shadow_width(btn_music_dl, 0, 0);
+    lv_obj_set_style_outline_width(btn_music_dl, 0, 0);
+    lv_obj_set_grid_cell(btn_music_dl, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 3, 1);
+    items_.push_back({btn_music_dl, 1, 3});
+    lv_obj_add_event_cb(btn_music_dl, on_music_dl_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* img = lv_img_create(btn_music_dl);
+        lv_img_set_src(img, &icon_music_sd);
+        lv_obj_center(img);
+    }
 }
 
 void AppLauncher::launchMusic() { wm_.openApp(std::unique_ptr<IApp>(new AppMusic())); }
+
+void AppLauncher::launchMusicDownloader() { wm_.openApp(std::unique_ptr<IApp>(new AppMusicDownloader())); }
  
 void AppLauncher::launchTest() { wm_.openApp(std::unique_ptr<IApp>(new AppTest())); }
 void AppLauncher::launchDevices() { wm_.openApp(std::unique_ptr<IApp>(new AppDevices())); }

@@ -25,6 +25,7 @@ public:
     void onClose() override;
 
     void launchMusic();
+    void launchMusicDownloader();
     void launchTest();
     void launchDevices();
     void launchBluetooth();
