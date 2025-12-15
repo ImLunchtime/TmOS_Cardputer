@@ -24,6 +24,7 @@
 #include "theme.h"
 #include "input_kb.h"
 LV_IMG_DECLARE(icon_music_sd);
+LV_IMG_DECLARE(icon_music_cloud);
 LV_IMG_DECLARE(icon_test);
 LV_IMG_DECLARE(icon_devices);
 LV_IMG_DECLARE(icon_bluetooth);
@@ -376,7 +377,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     lv_obj_add_event_cb(btn_music_dl, on_music_dl_item_event, LV_EVENT_CLICKED, this);
     {
         lv_obj_t* img = lv_img_create(btn_music_dl);
-        lv_img_set_src(img, &icon_music_sd);
+        lv_img_set_src(img, &icon_music_cloud);
         lv_obj_center(img);
     }
 }
