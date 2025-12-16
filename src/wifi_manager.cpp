@@ -1,5 +1,6 @@
 #include "wifi_manager.h"
 #include <vector>
+#include <esp_wifi.h>
 
 namespace wifi_manager {
     static State s_state = State::Idle;
@@ -11,13 +12,25 @@ namespace wifi_manager {
     static bool s_scanning = false;
     static uint32_t s_scan_deadline = 0;
 
+    static void hard_reset_wifi() {
+        esp_wifi_stop();
+        esp_wifi_deinit();
+        WiFi.disconnect(true, true);
+        WiFi.mode(WIFI_MODE_NULL);
+        delay(50);
+    }
+ 
     static void ensure_sta_mode() {
+        wifi_mode_t mode = WiFi.getMode();
+        if (mode != WIFI_MODE_STA) {
+            hard_reset_wifi();
+        }
         WiFi.mode(WIFI_STA);
     }
 
     void init() {
+        hard_reset_wifi();
         ensure_sta_mode();
-        WiFi.disconnect(true);
         WiFi.setAutoReconnect(true);
         s_state = State::Idle;
         s_connected_ssid = "";
