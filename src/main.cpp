@@ -9,16 +9,16 @@
 #include <M5Cardputer.h>
 #include <lvgl.h>
 
-#include "lvgl_port.h"
-#include "input_kb.h"
-#include "window_system.h"
-#include "SDFileManager.h"
+#include "drivers/lvgl_port.h"
+#include "drivers/input_kb.h"
+#include "core/window_system.h"
+#include "storage/SDFileManager.h"
 #include "apps/launcher/app_launcher.h"
-#include "theme.h"
-#include "globals.h"
-#include "ui_status_bar.h"
-#include "wifi_manager.h"
-#include "config_manager.h"
+#include "ui/theme.h"
+#include "core/globals.h"
+#include "ui/ui_status_bar.h"
+#include "services/wifi_manager.h"
+#include "services/config_manager.h"
 
 static WindowSystem g_wm;
 

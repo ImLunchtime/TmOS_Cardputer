@@ -1,13 +1,13 @@
 #include "apps/music_downloader/app_music_downloader.h"
-#include "theme.h"
-#include "ui_notify.h"
-#include "input_kb.h"
+#include "ui/theme.h"
+#include "ui/ui_notify.h"
+#include "drivers/input_kb.h"
 #include <ArduinoJson.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <WiFiClient.h>
 #include <SD.h>
-#include "dns_resolver.h"
+#include "services/dns_resolver.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 

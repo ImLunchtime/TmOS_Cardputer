@@ -1,5 +1,5 @@
-#include "ui_notify.h"
-#include "theme.h"
+#include "ui/ui_notify.h"
+#include "ui/theme.h"
 
 static lv_obj_t* s_cont = nullptr;
 static lv_timer_t* s_timer = nullptr;

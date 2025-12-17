@@ -1,6 +1,6 @@
-#include "ux_runtime.h"
+#include "ux/ux_runtime.h"
 #include <SD.h>
-#include "theme.h"
+#include "ui/theme.h"
 
 namespace ux {
 

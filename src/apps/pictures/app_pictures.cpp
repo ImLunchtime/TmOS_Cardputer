@@ -3,8 +3,8 @@
 #include <M5Cardputer.h>
 #include <cstring>
 #include <MD5Builder.h>
-#include "input_kb.h"
-#include "ui_notify.h"
+#include "drivers/input_kb.h"
+#include "ui/ui_notify.h"
 
 AppPictures::AppPictures() {}
 AppPictures::~AppPictures() {}

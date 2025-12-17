@@ -1,8 +1,8 @@
 #include "apps/music/app_music.h"
-#include "theme.h"
-#include "input_kb.h"
+#include "ui/theme.h"
+#include "drivers/input_kb.h"
 #include <lvgl.h>
-#include "ui_notify.h"
+#include "ui/ui_notify.h"
 
 void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_flex_flow(parent, LV_FLEX_FLOW_COLUMN);

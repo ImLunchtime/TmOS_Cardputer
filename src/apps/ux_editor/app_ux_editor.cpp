@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <unordered_map>
-#include "ui_notify.h"
+#include "ui/ui_notify.h"
 
 static void on_new(lv_event_t* e) { auto* app = (AppUXEditor*)lv_event_get_user_data(e); if (app) app->create_new(); }
 static void on_save(lv_event_t* e) { auto* app = (AppUXEditor*)lv_event_get_user_data(e); if (app) app->save_current(); }

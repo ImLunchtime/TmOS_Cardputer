@@ -1,10 +1,10 @@
-#include "config_manager.h"
+#include "services/config_manager.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include "ui_notify.h"
-#include "SDFileManager.h"
-#include "globals.h"
-#include "wifi_manager.h"
+#include "ui/ui_notify.h"
+#include "storage/SDFileManager.h"
+#include "core/globals.h"
+#include "services/wifi_manager.h"
 #include <lvgl.h>
 
 namespace config_manager {

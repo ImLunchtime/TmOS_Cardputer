@@ -1,7 +1,7 @@
 #pragma once
-#include "window_system.h"
-#include "SDFileManager.h"
-#include "ux_runtime.h"
+#include "core/window_system.h"
+#include "storage/SDFileManager.h"
+#include "ux/ux_runtime.h"
 #include <vector>
 #include <unordered_map>
 

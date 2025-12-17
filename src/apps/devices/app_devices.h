@@ -8,8 +8,8 @@
 #include <string>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
-#include "window_system.h"
-#include "theme.h"
+#include "core/window_system.h"
+#include "ui/theme.h"
 
 class AppDevices : public IApp {
 public:

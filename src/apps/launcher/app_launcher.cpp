@@ -21,8 +21,8 @@
 #include "apps/station_reporter/app_station_reporter.h"
 #include "apps/brightness/app_brightness.h"
 #include "apps/wifi/app_wifi.h"
-#include "theme.h"
-#include "input_kb.h"
+#include "ui/theme.h"
+#include "drivers/input_kb.h"
 LV_IMG_DECLARE(icon_music_sd);
 LV_IMG_DECLARE(icon_music_cloud);
 LV_IMG_DECLARE(icon_test);

@@ -1,9 +1,9 @@
 #include "apps/ux_executor/app_ux_executor.h"
 #include "apps/ux_runner/app_ux_runner.h"
-#include "theme.h"
+#include "ui/theme.h"
 #include <vector>
 #include <unordered_map>
-#include "ui_notify.h"
+#include "ui/ui_notify.h"
 
 static void on_item_clicked(lv_event_t* e) {
     AppUXExecutor* app = (AppUXExecutor*)lv_event_get_user_data(e);

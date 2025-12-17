@@ -10,7 +10,7 @@
 #include <lvgl.h>
 #include <vector>
 #include <unordered_map>
-#include "input_kb.h"
+#include "drivers/input_kb.h"
 
 static lv_indev_t *kb_indev = nullptr;
 static lv_group_t *kb_group = nullptr;

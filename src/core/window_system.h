@@ -11,7 +11,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include "theme.h"
+#include "ui/theme.h"
 
 // Base interface for apps hosted by the window system
 class IApp {

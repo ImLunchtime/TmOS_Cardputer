@@ -1,8 +1,8 @@
 #include "apps/wifi/app_wifi.h"
-#include "theme.h"
-#include "ui_notify.h"
-#include "input_kb.h"
-#include "config_manager.h"
+#include "ui/theme.h"
+#include "ui/ui_notify.h"
+#include "drivers/input_kb.h"
+#include "services/config_manager.h"
 
 AppWiFi::AppWiFi() {}
 AppWiFi::~AppWiFi() {}

@@ -1,5 +1,5 @@
-#include "globals.h"
-#include "config_manager.h"
+#include "core/globals.h"
+#include "services/config_manager.h"
 
 namespace globals {
 

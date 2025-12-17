@@ -1,7 +1,7 @@
 #pragma once
 #include <lvgl.h>
 #include <functional>
-#include "window_system.h"
+#include "core/window_system.h"
 
 // App-defined custom key handler
 struct AppCustomKey {

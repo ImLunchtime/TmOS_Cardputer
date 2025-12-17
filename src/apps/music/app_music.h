@@ -5,8 +5,8 @@
 #include <string>
 #include <map>
 
-#include "window_system.h"
-#include "SDFileManager.h"
+#include "core/window_system.h"
+#include "storage/SDFileManager.h"
 
 // ESP8266Audio headers
 #include <AudioOutput.h>

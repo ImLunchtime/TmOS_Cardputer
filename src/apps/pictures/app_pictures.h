@@ -1,7 +1,7 @@
 #pragma once
-#include "window_system.h"
-#include "theme.h"
-#include "SDFileManager.h"
+#include "core/window_system.h"
+#include "ui/theme.h"
+#include "storage/SDFileManager.h"
 #include <vector>
 #include <map>
 

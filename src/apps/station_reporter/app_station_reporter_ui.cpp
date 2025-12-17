@@ -2,8 +2,8 @@
 #include <lvgl.h>
 #include <SD.h>
 #include <ArduinoJson.h>
-#include "theme.h"
-#include "ui_notify.h"
+#include "ui/theme.h"
+#include "ui/ui_notify.h"
 
 void AppStationReporter::buildTab1(lv_obj_t* parent) {
     lv_obj_set_flex_flow(parent, LV_FLEX_FLOW_COLUMN);

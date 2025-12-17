@@ -1,6 +1,6 @@
-#include "window_system.h"
-#include "input_kb.h"
-#include "theme.h"
+#include "core/window_system.h"
+#include "drivers/input_kb.h"
+#include "ui/theme.h"
 #include <M5Cardputer.h>
 
 static inline bool obj_is_focusable(lv_obj_t* obj) {

@@ -1,6 +1,6 @@
 #pragma once
-#include "window_system.h"
-#include "wifi_manager.h"
+#include "core/window_system.h"
+#include "services/wifi_manager.h"
 #include <lvgl.h>
 #include <vector>
 

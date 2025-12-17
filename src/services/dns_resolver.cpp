@@ -1,4 +1,4 @@
-#include "dns_resolver.h"
+#include "services/dns_resolver.h"
 #include <WiFiUdp.h>
 
 namespace dns_resolver {

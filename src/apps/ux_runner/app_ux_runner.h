@@ -1,6 +1,6 @@
 #pragma once
-#include "window_system.h"
-#include "ux_runtime.h"
+#include "core/window_system.h"
+#include "ux/ux_runtime.h"
 
 class AppUXRunner : public IApp {
 public:

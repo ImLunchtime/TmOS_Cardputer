@@ -1,8 +1,8 @@
 #include "apps/music/app_music.h"
-#include "theme.h"
-#include "input_kb.h"
+#include "ui/theme.h"
+#include "drivers/input_kb.h"
 #include <SD.h>
-#include "ui_notify.h"
+#include "ui/ui_notify.h"
 
 void AppMusic::onOpen(lv_obj_t* window_root) {
     root_ = window_root;

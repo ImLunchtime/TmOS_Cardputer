@@ -1,5 +1,5 @@
 #include "apps/brightness/app_brightness.h"
-#include "globals.h"
+#include "core/globals.h"
 #include <lvgl.h>
 #include <M5Cardputer.h>
 

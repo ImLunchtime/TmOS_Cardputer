@@ -1,5 +1,5 @@
 #pragma once
-#include "window_system.h"
+#include "core/window_system.h"
 #include <vector>
 #include <ArduinoJson.h>
 #include <lvgl.h>

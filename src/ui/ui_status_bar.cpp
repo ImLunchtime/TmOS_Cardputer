@@ -1,7 +1,7 @@
-#include "ui_status_bar.h"
+#include "ui/ui_status_bar.h"
 #include <M5Cardputer.h>
-#include "theme.h"
-#include "wifi_manager.h"
+#include "ui/theme.h"
+#include "services/wifi_manager.h"
 
 namespace ui_status_bar {
 static lv_obj_t* s_bar = nullptr;
