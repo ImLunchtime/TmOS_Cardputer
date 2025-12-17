@@ -4,11 +4,42 @@
 #include <lvgl.h>
 #include "ui/ui_notify.h"
 
+LV_IMG_DECLARE(music_disc);
+
+static const lv_color_t kMusicAccent = lv_color_hex(0xED6B6B);
+
+static void apply_music_list_item_style(lv_obj_t* btn) {
+    if (!btn) return;
+    lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn, 0, 0);
+    lv_obj_set_style_shadow_opa(btn, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_text_color(btn, lv_color_white(), 0);
+    lv_obj_set_style_bg_color(btn, lv_color_white(), LV_STATE_FOCUSED);
+    lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_STATE_FOCUSED);
+    lv_obj_set_style_text_color(btn, kMusicAccent, LV_STATE_FOCUSED);
+    lv_obj_set_style_bg_color(btn, lv_color_white(), LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_STATE_PRESSED);
+    lv_obj_set_style_text_color(btn, kMusicAccent, LV_STATE_PRESSED);
+
+    uint32_t child_cnt = lv_obj_get_child_cnt(btn);
+    for (uint32_t i = 0; i < child_cnt; ++i) {
+        lv_obj_t* c = lv_obj_get_child(btn, i);
+        if (!c) continue;
+        if (lv_obj_has_class(c, &lv_label_class)) {
+            lv_obj_set_style_text_color(c, lv_color_white(), 0);
+            lv_obj_set_style_text_color(c, kMusicAccent, LV_STATE_FOCUSED);
+            lv_obj_set_style_text_color(c, kMusicAccent, LV_STATE_PRESSED);
+        }
+    }
+}
+
 void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_flex_flow(parent, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_all(parent, 0, 0);
     lv_obj_set_style_pad_row(parent, 0, 0);
     ui_theme::apply_small_text_recursive(parent);
+    lv_obj_set_style_bg_color(parent, kMusicAccent, 0);
+    lv_obj_set_style_bg_opa(parent, LV_OPA_COVER, 0);
 
     now_playing_ = nullptr;
     status_ = nullptr;
@@ -19,6 +50,10 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_flex_grow(list_, 1);
     lv_obj_add_flag(list_, LV_OBJ_FLAG_SCROLLABLE);
     ui_theme::apply_list_menu(list_);
+    lv_obj_set_style_bg_opa(list_, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(list_, 0, 0);
+    lv_obj_set_style_pad_all(list_, 0, 0);
+    lv_obj_set_style_bg_opa(list_, LV_OPA_TRANSP, LV_PART_SCROLLBAR);
 
     player_view_ = lv_obj_create(parent);
     lv_obj_set_size(player_view_, lv_pct(100), lv_pct(100));
@@ -26,17 +61,66 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_flex_flow(player_view_, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_all(player_view_, 2, 0);
     lv_obj_set_style_pad_row(player_view_, 2, 0);
+    lv_obj_set_style_bg_opa(player_view_, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(player_view_, 0, 0);
     lv_obj_add_flag(player_view_, LV_OBJ_FLAG_HIDDEN);
 
     content_col_ = lv_obj_create(player_view_);
     lv_obj_set_flex_grow(content_col_, 1);
     lv_obj_set_style_pad_all(content_col_, 2, 0);
-    lv_obj_set_style_pad_row(content_col_, 0, 0);
+    lv_obj_set_style_pad_row(content_col_, 2, 0);
+    lv_obj_set_style_pad_column(content_col_, 2, 0);
     lv_obj_set_flex_flow(content_col_, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_height(content_col_, LV_SIZE_CONTENT);
+    lv_obj_set_height(content_col_, lv_pct(100));
     lv_obj_set_style_border_width(content_col_, 0, 0);
     lv_obj_set_style_border_opa(content_col_, LV_OPA_TRANSP, 0);
     lv_obj_set_width(content_col_, lv_pct(100));
+    lv_obj_set_style_bg_opa(content_col_, LV_OPA_TRANSP, 0);
+
+    track_name_ = lv_label_create(content_col_);
+    lv_label_set_text(track_name_, "Track: -");
+    lv_label_set_long_mode(track_name_, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_style_text_line_space(track_name_, 0, 0);
+    lv_obj_set_style_min_height(track_name_, 8, 0);
+    lv_obj_set_style_text_color(track_name_, lv_color_white(), 0);
+
+    lv_obj_t* content_row = lv_obj_create(content_col_);
+    lv_obj_set_width(content_row, lv_pct(100));
+    lv_obj_set_flex_grow(content_row, 1);
+    lv_obj_set_flex_flow(content_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_border_width(content_row, 0, 0);
+    lv_obj_set_style_bg_opa(content_row, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_pad_all(content_row, 0, 0);
+    lv_obj_set_style_pad_column(content_row, 4, 0);
+
+    lv_obj_t* disc_box = lv_obj_create(content_row);
+    lv_obj_set_size(disc_box, 64, lv_pct(100));
+    lv_obj_set_style_bg_opa(disc_box, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(disc_box, 0, 0);
+    lv_obj_set_style_pad_all(disc_box, 0, 0);
+
+    disc_img_ = lv_img_create(disc_box);
+    lv_img_set_src(disc_img_, &music_disc);
+    lv_obj_set_style_bg_opa(disc_img_, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(disc_img_, 0, 0);
+    lv_obj_center(disc_img_);
+
+    lyrics_container_ = lv_obj_create(content_row);
+    lv_obj_set_flex_grow(lyrics_container_, 1);
+    lv_obj_set_height(lyrics_container_, lv_pct(100));
+    lv_obj_set_style_bg_opa(lyrics_container_, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(lyrics_container_, 0, 0);
+    lv_obj_set_style_pad_all(lyrics_container_, 0, 0);
+    lv_obj_set_scroll_dir(lyrics_container_, LV_DIR_VER);
+    lv_obj_set_scrollbar_mode(lyrics_container_, LV_SCROLLBAR_MODE_OFF);
+
+    lyrics_label_ = lv_label_create(lyrics_container_);
+    lv_label_set_text(lyrics_label_, "");
+    lv_label_set_long_mode(lyrics_label_, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(lyrics_label_, lv_pct(100));
+    lv_obj_set_style_text_color(lyrics_label_, lv_color_white(), 0);
+    ui_theme::apply_small_text_recursive(lyrics_label_);
+    lv_obj_set_style_text_line_space(lyrics_label_, 0, 0);
 
     control_col_ = lv_obj_create(player_view_);
     lv_obj_set_width(control_col_, lv_pct(100));
@@ -48,43 +132,8 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_height(control_col_, 18);
     lv_obj_set_style_border_width(control_col_, 0, 0);
     lv_obj_set_style_border_opa(control_col_, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_bg_opa(control_col_, LV_OPA_TRANSP, 0);
     lv_obj_move_to_index(control_col_, 0);
-
-    track_name_ = lv_label_create(content_col_);
-    lv_label_set_text(track_name_, "Track: -");
-    lv_label_set_long_mode(track_name_, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_style_text_line_space(track_name_, 0, 0);
-    lv_obj_set_style_min_height(track_name_, 8, 0);
-    lyric_prev_ = lv_label_create(content_col_);
-    lv_label_set_text(lyric_prev_, "");
-    lv_obj_set_style_text_align(lyric_prev_, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_pad_ver(lyric_prev_, 0, 0);
-    lv_obj_set_style_text_line_space(lyric_prev_, 0, 0);
-    lv_obj_set_style_min_height(lyric_prev_, 8, 0);
-    lv_label_set_long_mode(lyric_prev_, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_width(lyric_prev_, lv_pct(100));
-    lv_obj_set_style_text_color(lyric_prev_, lv_color_hex(0xaaaaaa), 0);
-    ui_theme::apply_small_text_recursive(lyric_prev_);
-    lyric_curr_ = lv_label_create(content_col_);
-    lv_label_set_text(lyric_curr_, "");
-    lv_obj_set_style_text_align(lyric_curr_, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_pad_ver(lyric_curr_, 0, 0);
-    lv_obj_set_style_text_line_space(lyric_curr_, 0, 0);
-    lv_obj_set_style_min_height(lyric_curr_, 8, 0);
-    lv_label_set_long_mode(lyric_curr_, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_width(lyric_curr_, lv_pct(100));
-    ui_theme::apply_small_text_recursive(lyric_curr_);
-    lv_obj_set_style_text_color(lyric_curr_, lv_color_hex(0x000000), 0);
-    lyric_next_ = lv_label_create(content_col_);
-    lv_label_set_text(lyric_next_, "");
-    lv_obj_set_style_text_align(lyric_next_, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_pad_ver(lyric_next_, 0, 0);
-    lv_obj_set_style_text_line_space(lyric_next_, 0, 0);
-    lv_obj_set_style_min_height(lyric_next_, 8, 0);
-    lv_label_set_long_mode(lyric_next_, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_width(lyric_next_, lv_pct(100));
-    lv_obj_set_style_text_color(lyric_next_, lv_color_hex(0xaaaaaa), 0);
-    ui_theme::apply_small_text_recursive(lyric_next_);
 
     back_btn_ = lv_btn_create(control_col_);
     lv_obj_set_size(back_btn_, 16, 14);
@@ -93,7 +142,7 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_style_shadow_opa(back_btn_, LV_OPA_TRANSP, 0);
     lv_obj_t* back_label = lv_label_create(back_btn_);
     lv_label_set_text(back_label, LV_SYMBOL_LEFT);
-    lv_obj_set_style_text_color(back_label, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_text_color(back_label, lv_color_white(), 0);
     lv_obj_center(back_label);
     lv_obj_add_flag(back_btn_, LV_OBJ_FLAG_CLICK_FOCUSABLE);
     lv_obj_add_event_cb(back_btn_, on_back_btn_clicked, LV_EVENT_CLICKED, this);
@@ -102,6 +151,13 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_flex_grow(player_volume_, 1);
     lv_obj_set_height(player_volume_, 8);
     lv_slider_set_range(player_volume_, 0, 10);
+    lv_obj_set_style_bg_color(player_volume_, lv_color_white(), 0);
+    lv_obj_set_style_bg_opa(player_volume_, LV_OPA_40, 0);
+    lv_obj_set_style_bg_color(player_volume_, lv_color_white(), LV_PART_INDICATOR);
+    lv_obj_set_style_bg_opa(player_volume_, LV_OPA_COVER, LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(player_volume_, lv_color_white(), LV_PART_KNOB);
+    lv_obj_set_style_bg_opa(player_volume_, LV_OPA_COVER, LV_PART_KNOB);
+    lv_obj_set_style_border_width(player_volume_, 0, 0);
     lv_obj_add_event_cb(player_volume_, on_player_volume_event, LV_EVENT_VALUE_CHANGED, this);
 }
 
@@ -144,6 +200,7 @@ void AppMusic::populateArtistList() {
     for (const auto& kv : category_) {
         lv_obj_t* btn = lv_list_add_btn(list_, LV_SYMBOL_DIRECTORY, kv.first.c_str());
         ui_theme::apply_list_menu_item(btn);
+        apply_music_list_item_style(btn);
         lv_obj_add_event_cb(btn, on_artist_item_clicked, LV_EVENT_CLICKED, this);
     }
     rebuildFocusGroup();
@@ -155,14 +212,16 @@ void AppMusic::populateAlbumList(const std::string& artist) {
     list_level_ = LEVEL_ALBUM;
     current_artist_ = artist;
     current_album_.clear();
-    lv_obj_t* back = lv_list_add_btn(list_, LV_SYMBOL_LEFT, "返回");
+    lv_obj_t* back = lv_list_add_btn(list_, LV_SYMBOL_LEFT, "Back");
     ui_theme::apply_list_menu_item(back);
+    apply_music_list_item_style(back);
     lv_obj_add_event_cb(back, on_album_item_clicked, LV_EVENT_CLICKED, this);
     auto it = category_.find(artist);
     if (it != category_.end()) {
         for (const auto& kv : it->second) {
             lv_obj_t* btn = lv_list_add_btn(list_, LV_SYMBOL_DIRECTORY, kv.first.c_str());
             ui_theme::apply_list_menu_item(btn);
+            apply_music_list_item_style(btn);
             lv_obj_add_event_cb(btn, on_album_item_clicked, LV_EVENT_CLICKED, this);
         }
     }
@@ -175,8 +234,9 @@ void AppMusic::populateTrackList(const std::string& artist, const std::string& a
     list_level_ = LEVEL_TRACK;
     current_artist_ = artist;
     current_album_ = album;
-    lv_obj_t* back = lv_list_add_btn(list_, LV_SYMBOL_LEFT, "返回");
+    lv_obj_t* back = lv_list_add_btn(list_, LV_SYMBOL_LEFT, "Back");
     ui_theme::apply_list_menu_item(back);
+    apply_music_list_item_style(back);
     lv_obj_add_event_cb(back, on_track_item_clicked, LV_EVENT_CLICKED, this);
     auto it = category_.find(artist);
     if (it != category_.end()) {
@@ -185,6 +245,7 @@ void AppMusic::populateTrackList(const std::string& artist, const std::string& a
             for (int idx : it2->second) {
                 lv_obj_t* btn = lv_list_add_btn(list_, LV_SYMBOL_AUDIO, names_[idx].c_str());
                 ui_theme::apply_list_menu_item(btn);
+                apply_music_list_item_style(btn);
                 lv_obj_add_event_cb(btn, on_track_item_clicked, LV_EVENT_CLICKED, this);
             }
         }
@@ -294,7 +355,7 @@ void AppMusic::on_album_item_clicked(lv_event_t* e) {
     lv_obj_t* target = lv_event_get_target(e);
     const char* txt = lv_list_get_btn_text(app->list_, target);
     if (!txt) return;
-    if (strcmp(txt, "返回") == 0) app->populateArtistList();
+    if (strcmp(txt, "Back") == 0) app->populateArtistList();
     else app->populateTrackList(app->current_artist_, txt);
 }
 
@@ -304,7 +365,7 @@ void AppMusic::on_track_item_clicked(lv_event_t* e) {
     lv_obj_t* target = lv_event_get_target(e);
     const char* txt = lv_list_get_btn_text(app->list_, target);
     if (!txt) return;
-    if (strcmp(txt, "返回") == 0) {
+    if (strcmp(txt, "Back") == 0) {
         app->populateAlbumList(app->current_artist_);
         return;
     }

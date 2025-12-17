@@ -23,16 +23,18 @@ uint32_t AppMusic::parse_lrc_timestamp(const char* p, size_t len) {
 void AppMusic::clearLyrics() {
     lyrics_.clear();
     lyric_index_ = -1;
-    if (lyric_prev_) lv_label_set_text(lyric_prev_, "");
-    if (lyric_curr_) lv_label_set_text(lyric_curr_, "");
-    if (lyric_next_) lv_label_set_text(lyric_next_, "");
+    if (lyrics_label_) lv_label_set_text(lyrics_label_, "");
+    if (lyrics_container_) lv_obj_scroll_to_y(lyrics_container_, 0, LV_ANIM_OFF);
 }
 
 void AppMusic::loadLyricsForPath(const std::string& mp3_path) {
     clearLyrics();
     std::string lrc = replaceExtension(mp3_path, ".lrc");
     File f = SD.open(lrc.c_str());
-    if (!f) return;
+    if (!f) {
+        if (lyrics_label_) lv_label_set_text(lyrics_label_, "No lyrics file");
+        return;
+    }
     while (f.available()) {
         String line = f.readStringUntil('\n');
         line.trim();
@@ -60,26 +62,20 @@ void AppMusic::loadLyricsForPath(const std::string& mp3_path) {
     if (!lyrics_.empty()) {
         std::sort(lyrics_.begin(), lyrics_.end(), [](const LyricLine& a, const LyricLine& b){ return a.t < b.t; });
     }
+    if (lyrics_.empty()) {
+        if (lyrics_label_) lv_label_set_text(lyrics_label_, "No lyrics file");
+        return;
+    }
+    std::string display;
+    display.reserve(lyrics_.size() * 24);
+    for (size_t i = 0; i < lyrics_.size(); ++i) {
+        if (i) display.push_back('\n');
+        display += lyrics_[i].s;
+    }
+    if (lyrics_label_) lv_label_set_text(lyrics_label_, display.c_str());
+    if (lyrics_container_) lv_obj_scroll_to_y(lyrics_container_, 0, LV_ANIM_OFF);
 }
 
 void AppMusic::updateLyrics(uint32_t elapsed_ms) {
-    if (lyrics_.empty()) return;
-    int idx = lyric_index_;
-    if (idx < 0 || (size_t)idx >= lyrics_.size() || elapsed_ms < lyrics_[idx].t || (idx + 1 < (int)lyrics_.size() && elapsed_ms >= lyrics_[idx + 1].t)) {
-        int lo = 0, hi = (int)lyrics_.size() - 1, ans = 0;
-        while (lo <= hi) {
-            int mid = (lo + hi) / 2;
-            if (lyrics_[mid].t <= elapsed_ms) { ans = mid; lo = mid + 1; }
-            else { hi = mid - 1; }
-        }
-        idx = ans;
-        lyric_index_ = idx;
-    }
-    const char* prev = idx > 0 ? lyrics_[idx - 1].s.c_str() : "";
-    const char* curr = lyrics_[idx].s.c_str();
-    const char* next = (idx + 1 < (int)lyrics_.size()) ? lyrics_[idx + 1].s.c_str() : "";
-    if (lyric_prev_) lv_label_set_text(lyric_prev_, prev);
-    if (lyric_curr_) lv_label_set_text(lyric_curr_, curr);
-    if (lyric_next_) lv_label_set_text(lyric_next_, next);
+    (void)elapsed_ms;
 }
-

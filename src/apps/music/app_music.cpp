@@ -16,8 +16,8 @@ void AppMusic::onOpen(lv_obj_t* window_root) {
     buildUI(root_);
 
     if (!sd_.initialize()) {
-        ui_notify::showSymbol(LV_SYMBOL_WARNING, "无法读取SD卡", 2500);
-        updateStatus("无法读取SD卡");
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "Unable to read SD card", 2500);
+        updateStatus("Unable to read SD card");
         return;
     }
 

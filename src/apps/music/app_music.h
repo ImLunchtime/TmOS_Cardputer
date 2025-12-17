@@ -86,9 +86,9 @@ private:
     lv_obj_t* player_volume_ = nullptr;
     lv_obj_t* content_col_ = nullptr;
     lv_obj_t* control_col_ = nullptr;
-    lv_obj_t* lyric_prev_ = nullptr;
-    lv_obj_t* lyric_curr_ = nullptr;
-    lv_obj_t* lyric_next_ = nullptr;
+    lv_obj_t* disc_img_ = nullptr;
+    lv_obj_t* lyrics_container_ = nullptr;
+    lv_obj_t* lyrics_label_ = nullptr;
 
     // View state
     bool in_player_mode_ = false;

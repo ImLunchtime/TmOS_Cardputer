@@ -78,8 +78,8 @@ void AppMusic::addDir(const char* dir) {
                 std::string base = names_.back();
                 std::string artist, album, title;
                 if (!parseNameParts(base, artist, album, title)) {
-                    artist = "未分类";
-                    album = "未分类";
+                    artist = "Uncategorized";
+                    album = "Uncategorized";
                 }
                 category_[artist][album].push_back((int)paths_.size() - 1);
             }
@@ -88,4 +88,3 @@ void AppMusic::addDir(const char* dir) {
     }
     root.close();
 }
-
