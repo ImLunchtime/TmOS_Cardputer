@@ -21,6 +21,7 @@
 #include "apps/station_reporter/app_station_reporter.h"
 #include "apps/brightness/app_brightness.h"
 #include "apps/wifi/app_wifi.h"
+#include "apps/remote/app_remote.h"
 #include "ui/theme.h"
 #include "drivers/input_kb.h"
 LV_IMG_DECLARE(icon_music_sd);
@@ -37,6 +38,7 @@ LV_IMG_DECLARE(icon_radio);
 LV_IMG_DECLARE(icon_station_reporter);
 LV_IMG_DECLARE(icon_brightness);
 LV_IMG_DECLARE(icon_wifi);
+LV_IMG_DECLARE(icon_remote);
 
 static void on_brightness_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
@@ -122,6 +124,12 @@ static void on_wifi_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
     if (!launcher) return;
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchWiFi();
+}
+
+static void on_remote_item_event(lv_event_t* e) {
+    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
+    if (!launcher) return;
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchRemote();
 }
 
 void AppLauncher::onOpen(lv_obj_t* window_root) {
@@ -380,6 +388,22 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
         lv_img_set_src(img, &icon_music_cloud);
         lv_obj_center(img);
     }
+
+    lv_obj_t* btn_remote = lv_btn_create(grid_);
+    lv_obj_set_size(btn_remote, 36, 36);
+    lv_obj_set_style_bg_opa(btn_remote, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(btn_remote, 0, 0);
+    lv_obj_set_style_radius(btn_remote, 0, 0);
+    lv_obj_set_style_shadow_width(btn_remote, 0, 0);
+    lv_obj_set_style_outline_width(btn_remote, 0, 0);
+    lv_obj_set_grid_cell(btn_remote, LV_GRID_ALIGN_CENTER, 2, 1, LV_GRID_ALIGN_CENTER, 3, 1);
+    items_.push_back({btn_remote, 2, 3});
+    lv_obj_add_event_cb(btn_remote, on_remote_item_event, LV_EVENT_CLICKED, this);
+    {
+        lv_obj_t* img = lv_img_create(btn_remote);
+        lv_img_set_src(img, &icon_remote);
+        lv_obj_center(img);
+    }
 }
 
 void AppLauncher::launchMusic() { wm_.openApp(std::unique_ptr<IApp>(new AppMusic())); }
@@ -398,6 +422,7 @@ void AppLauncher::launchRadioSim() { wm_.openApp(std::unique_ptr<IApp>(new AppRa
 void AppLauncher::launchStationReporter() { wm_.openApp(std::unique_ptr<IApp>(new AppStationReporter())); }
 void AppLauncher::launchBrightness() { wm_.openApp(std::unique_ptr<IApp>(new AppBrightness())); }
 void AppLauncher::launchWiFi() { wm_.openApp(std::unique_ptr<IApp>(new AppWiFi())); }
+void AppLauncher::launchRemote() { wm_.openApp(std::unique_ptr<IApp>(new AppRemote())); }
 void AppLauncher::moveFocus(int dx, int dy) {
     int curc = -1, curr = -1;
     for (auto &it : items_) { if (lv_obj_has_state(it.obj, LV_STATE_FOCUSED)) { curc = it.col; curr = it.row; break; } }

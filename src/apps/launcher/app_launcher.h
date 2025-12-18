@@ -38,6 +38,7 @@ public:
     void launchStationReporter();
     void launchBrightness();
     void launchWiFi();
+    void launchRemote();
 
 private:
     WindowSystem& wm_;
