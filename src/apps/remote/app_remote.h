@@ -11,7 +11,7 @@ public:
     AppRemote() = default;
     ~AppRemote() override = default;
 
-    const char* title() const override { return "Remote"; }
+    const char* title() const override { return nullptr; }
     ui_theme::ThemeId theme() const override { return ui_theme::ThemeId::Dark; }
 
     void onOpen(lv_obj_t* window_root) override;

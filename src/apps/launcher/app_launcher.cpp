@@ -155,254 +155,47 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
     static lv_coord_t row_dsc[] = {36, 36, 36, 36, LV_GRID_TEMPLATE_LAST};
     lv_obj_set_grid_dsc_array(grid_, col_dsc, row_dsc);
 
-    lv_obj_t* btn_music = lv_btn_create(grid_);
-    lv_obj_set_size(btn_music, 36, 36);
-    lv_obj_set_style_bg_opa(btn_music, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_music, 0, 0);
-    lv_obj_set_style_radius(btn_music, 0, 0);
-    lv_obj_set_style_shadow_width(btn_music, 0, 0);
-    lv_obj_set_style_outline_width(btn_music, 0, 0);
-    lv_obj_set_grid_cell(btn_music, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
-    items_.push_back({btn_music, 0, 0});
-    lv_obj_add_event_cb(btn_music, on_music_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_music);
-        lv_img_set_src(img, &icon_music_sd);
-        lv_obj_center(img);
-    }
-
-
-    lv_obj_t* btn_test = lv_btn_create(grid_);
-    lv_obj_set_size(btn_test, 36, 36);
-    lv_obj_set_style_bg_opa(btn_test, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_test, 0, 0);
-    lv_obj_set_style_radius(btn_test, 0, 0);
-    lv_obj_set_style_shadow_width(btn_test, 0, 0);
-    lv_obj_set_style_outline_width(btn_test, 0, 0);
-    lv_obj_set_grid_cell(btn_test, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
-    items_.push_back({btn_test, 1, 0});
-    lv_obj_add_event_cb(btn_test, on_test_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_test);
-        lv_img_set_src(img, &icon_test);
-        lv_obj_center(img);
-    }
-
-
-    lv_obj_t* btn_devices = lv_btn_create(grid_);
-    lv_obj_set_size(btn_devices, 36, 36);
-    lv_obj_set_style_bg_opa(btn_devices, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_devices, 0, 0);
-    lv_obj_set_style_radius(btn_devices, 0, 0);
-    lv_obj_set_style_shadow_width(btn_devices, 0, 0);
-    lv_obj_set_style_outline_width(btn_devices, 0, 0);
-    lv_obj_set_grid_cell(btn_devices, LV_GRID_ALIGN_CENTER, 2, 1, LV_GRID_ALIGN_CENTER, 0, 1);
-    items_.push_back({btn_devices, 2, 0});
-    lv_obj_add_event_cb(btn_devices, on_devices_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_devices);
-        lv_img_set_src(img, &icon_devices);
-        lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_bluetooth = lv_btn_create(grid_);
-    lv_obj_set_size(btn_bluetooth, 36, 36);
-    lv_obj_set_style_bg_opa(btn_bluetooth, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_bluetooth, 0, 0);
-    lv_obj_set_style_radius(btn_bluetooth, 0, 0);
-    lv_obj_set_style_shadow_width(btn_bluetooth, 0, 0);
-    lv_obj_set_style_outline_width(btn_bluetooth, 0, 0);
-    lv_obj_set_grid_cell(btn_bluetooth, LV_GRID_ALIGN_CENTER, 3, 1, LV_GRID_ALIGN_CENTER, 0, 1);
-    items_.push_back({btn_bluetooth, 3, 0});
-    lv_obj_add_event_cb(btn_bluetooth, on_bluetooth_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_bluetooth);
-        lv_img_set_src(img, &icon_bluetooth);
-        lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_pictures = lv_btn_create(grid_);
-    lv_obj_set_size(btn_pictures, 36, 36);
-    lv_obj_set_style_bg_opa(btn_pictures, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_pictures, 0, 0);
-    lv_obj_set_style_radius(btn_pictures, 0, 0);
-    lv_obj_set_style_shadow_width(btn_pictures, 0, 0);
-    lv_obj_set_style_outline_width(btn_pictures, 0, 0);
-    lv_obj_set_grid_cell(btn_pictures, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
-    items_.push_back({btn_pictures, 0, 1});
-    lv_obj_add_event_cb(btn_pictures, on_pictures_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_pictures);
-        lv_img_set_src(img, &icon_pictures);
-        lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_circuitsim = lv_btn_create(grid_);
-    lv_obj_set_size(btn_circuitsim, 36, 36);
-    lv_obj_set_style_bg_opa(btn_circuitsim, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_circuitsim, 0, 0);
-    lv_obj_set_style_radius(btn_circuitsim, 0, 0);
-    lv_obj_set_style_shadow_width(btn_circuitsim, 0, 0);
-    lv_obj_set_style_outline_width(btn_circuitsim, 0, 0);
-    lv_obj_set_grid_cell(btn_circuitsim, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
-    items_.push_back({btn_circuitsim, 1, 1});
-    lv_obj_add_event_cb(btn_circuitsim, on_circuitsim_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_circuitsim);
-        lv_img_set_src(img, &icon_circuitsim2);
-        lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_ux_editor = lv_btn_create(grid_);
-    lv_obj_set_size(btn_ux_editor, 36, 36);
-    lv_obj_set_style_bg_opa(btn_ux_editor, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_ux_editor, 0, 0);
-    lv_obj_set_style_radius(btn_ux_editor, 0, 0);
-    lv_obj_set_style_shadow_width(btn_ux_editor, 0, 0);
-    lv_obj_set_style_outline_width(btn_ux_editor, 0, 0);
-    lv_obj_set_grid_cell(btn_ux_editor, LV_GRID_ALIGN_CENTER, 2, 1, LV_GRID_ALIGN_CENTER, 1, 1);
-    items_.push_back({btn_ux_editor, 2, 1});
-    lv_obj_add_event_cb(btn_ux_editor, on_ux_editor_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_ux_editor);
-        lv_img_set_src(img, &icon_uxedit2);
-        lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_ux_executor = lv_btn_create(grid_);
-    lv_obj_set_size(btn_ux_executor, 36, 36);
-    lv_obj_set_style_bg_opa(btn_ux_executor, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_ux_executor, 0, 0);
-    lv_obj_set_style_radius(btn_ux_executor, 0, 0);
-    lv_obj_set_style_shadow_width(btn_ux_executor, 0, 0);
-    lv_obj_set_style_outline_width(btn_ux_executor, 0, 0);
-    lv_obj_set_grid_cell(btn_ux_executor, LV_GRID_ALIGN_CENTER, 3, 1, LV_GRID_ALIGN_CENTER, 1, 1);
-    items_.push_back({btn_ux_executor, 3, 1});
-    lv_obj_add_event_cb(btn_ux_executor, on_ux_executor_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_ux_executor);
-        lv_img_set_src(img, &icon_uxexec);
-        lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_calculator = lv_btn_create(grid_);
-    lv_obj_set_size(btn_calculator, 36, 36);
-    lv_obj_set_style_bg_opa(btn_calculator, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_calculator, 0, 0);
-    lv_obj_set_style_radius(btn_calculator, 0, 0);
-    lv_obj_set_style_shadow_width(btn_calculator, 0, 0);
-    lv_obj_set_style_outline_width(btn_calculator, 0, 0);
-    lv_obj_set_grid_cell(btn_calculator, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 2, 1);
-    items_.push_back({btn_calculator, 0, 2});
-
     kb_register_app_keys(this, {
         { ';', [this](){ return true; }, [this](){ moveFocus(0, -1); } },
         { ',', [this](){ return true; }, [this](){ moveFocus(-1, 0); } },
         { '.', [this](){ return true; }, [this](){ moveFocus(0, 1); } },
         { '/', [this](){ return true; }, [this](){ moveFocus(1, 0); } },
     });
-    lv_obj_add_event_cb(btn_calculator, on_calculator_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_calculator);
-        lv_img_set_src(img, &icon_calculator);
+    struct Spec { const lv_img_dsc_t* icon; lv_event_cb_t cb; };
+    const Spec specs[] = {
+        { &icon_brightness, on_brightness_item_event },
+        { &icon_wifi, on_wifi_item_event },
+        { &icon_music_sd, on_music_item_event },
+        { &icon_music_cloud, on_music_dl_item_event },
+        { &icon_pictures, on_pictures_item_event },
+        { &icon_remote, on_remote_item_event },
+        { &icon_circuitsim2, on_circuitsim_item_event },
+        { &icon_station_reporter, on_station_reporter_item_event },
+        { &icon_uxedit2, on_ux_editor_item_event },
+        { &icon_uxexec, on_ux_executor_item_event },
+        { &icon_devices, on_devices_item_event },
+        { &icon_bluetooth, on_bluetooth_item_event },
+        { &icon_radio, on_radiosim_item_event },
+        { &icon_test, on_test_item_event },
+    };
+    int index = 0;
+    for (const auto& s : specs) {
+        lv_obj_t* btn = lv_btn_create(grid_);
+        lv_obj_set_size(btn, 36, 36);
+        lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, 0);
+        lv_obj_set_style_border_width(btn, 0, 0);
+        lv_obj_set_style_radius(btn, 0, 0);
+        lv_obj_set_style_shadow_width(btn, 0, 0);
+        lv_obj_set_style_outline_width(btn, 0, 0);
+        int col = index % cols_;
+        int row = index / cols_;
+        lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_CENTER, col, 1, LV_GRID_ALIGN_CENTER, row, 1);
+        items_.push_back({btn, col, row});
+        lv_obj_add_event_cb(btn, s.cb, LV_EVENT_CLICKED, this);
+        lv_obj_t* img = lv_img_create(btn);
+        lv_img_set_src(img, s.icon);
         lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_radiosim = lv_btn_create(grid_);
-    lv_obj_set_size(btn_radiosim, 36, 36);
-    lv_obj_set_style_bg_opa(btn_radiosim, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_radiosim, 0, 0);
-    lv_obj_set_style_radius(btn_radiosim, 0, 0);
-    lv_obj_set_style_shadow_width(btn_radiosim, 0, 0);
-    lv_obj_set_style_outline_width(btn_radiosim, 0, 0);
-    lv_obj_set_grid_cell(btn_radiosim, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 2, 1);
-    items_.push_back({btn_radiosim, 1, 2});
-    lv_obj_add_event_cb(btn_radiosim, on_radiosim_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_radiosim);
-        lv_img_set_src(img, &icon_radio);
-        lv_obj_center(img);
-    }
-
-
-    lv_obj_t* btn_station = lv_btn_create(grid_);
-    lv_obj_set_size(btn_station, 36, 36);
-    lv_obj_set_style_bg_opa(btn_station, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_station, 0, 0);
-    lv_obj_set_style_radius(btn_station, 0, 0);
-    lv_obj_set_style_shadow_width(btn_station, 0, 0);
-    lv_obj_set_style_outline_width(btn_station, 0, 0);
-    lv_obj_set_grid_cell(btn_station, LV_GRID_ALIGN_CENTER, 2, 1, LV_GRID_ALIGN_CENTER, 2, 1);
-    items_.push_back({btn_station, 2, 2});
-    lv_obj_add_event_cb(btn_station, on_station_reporter_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_station);
-        lv_img_set_src(img, &icon_station_reporter);
-        lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_brightness = lv_btn_create(grid_);
-    lv_obj_set_size(btn_brightness, 36, 36);
-    lv_obj_set_style_bg_opa(btn_brightness, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_brightness, 0, 0);
-    lv_obj_set_style_radius(btn_brightness, 0, 0);
-    lv_obj_set_style_shadow_width(btn_brightness, 0, 0);
-    lv_obj_set_style_outline_width(btn_brightness, 0, 0);
-    lv_obj_set_grid_cell(btn_brightness, LV_GRID_ALIGN_CENTER, 3, 1, LV_GRID_ALIGN_CENTER, 2, 1);
-    items_.push_back({btn_brightness, 3, 2});
-    lv_obj_add_event_cb(btn_brightness, on_brightness_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_brightness);
-        lv_img_set_src(img, &icon_brightness);
-        lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_wifi = lv_btn_create(grid_);
-    lv_obj_set_size(btn_wifi, 36, 36);
-    lv_obj_set_style_bg_opa(btn_wifi, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_wifi, 0, 0);
-    lv_obj_set_style_radius(btn_wifi, 0, 0);
-    lv_obj_set_style_shadow_width(btn_wifi, 0, 0);
-    lv_obj_set_style_outline_width(btn_wifi, 0, 0);
-    lv_obj_set_grid_cell(btn_wifi, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 3, 1);
-    items_.push_back({btn_wifi, 0, 3});
-    lv_obj_add_event_cb(btn_wifi, on_wifi_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_wifi);
-        lv_img_set_src(img, &icon_wifi);
-        lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_music_dl = lv_btn_create(grid_);
-    lv_obj_set_size(btn_music_dl, 36, 36);
-    lv_obj_set_style_bg_opa(btn_music_dl, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_music_dl, 0, 0);
-    lv_obj_set_style_radius(btn_music_dl, 0, 0);
-    lv_obj_set_style_shadow_width(btn_music_dl, 0, 0);
-    lv_obj_set_style_outline_width(btn_music_dl, 0, 0);
-    lv_obj_set_grid_cell(btn_music_dl, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_CENTER, 3, 1);
-    items_.push_back({btn_music_dl, 1, 3});
-    lv_obj_add_event_cb(btn_music_dl, on_music_dl_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_music_dl);
-        lv_img_set_src(img, &icon_music_cloud);
-        lv_obj_center(img);
-    }
-
-    lv_obj_t* btn_remote = lv_btn_create(grid_);
-    lv_obj_set_size(btn_remote, 36, 36);
-    lv_obj_set_style_bg_opa(btn_remote, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(btn_remote, 0, 0);
-    lv_obj_set_style_radius(btn_remote, 0, 0);
-    lv_obj_set_style_shadow_width(btn_remote, 0, 0);
-    lv_obj_set_style_outline_width(btn_remote, 0, 0);
-    lv_obj_set_grid_cell(btn_remote, LV_GRID_ALIGN_CENTER, 2, 1, LV_GRID_ALIGN_CENTER, 3, 1);
-    items_.push_back({btn_remote, 2, 3});
-    lv_obj_add_event_cb(btn_remote, on_remote_item_event, LV_EVENT_CLICKED, this);
-    {
-        lv_obj_t* img = lv_img_create(btn_remote);
-        lv_img_set_src(img, &icon_remote);
-        lv_obj_center(img);
+        index++;
     }
 }
 

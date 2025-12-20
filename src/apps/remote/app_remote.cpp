@@ -7,6 +7,7 @@
 
 LV_IMG_DECLARE(remote_microcar);
 
+#if 0
 void AppRemote::onOpen(lv_obj_t* window_root) {
     root_ = window_root;
     lv_obj_set_flex_flow(root_, LV_FLEX_FLOW_COLUMN);
@@ -22,11 +23,6 @@ void AppRemote::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_pad_row(page_main_, 6, 0);
     lv_obj_set_flex_flow(page_main_, LV_FLEX_FLOW_COLUMN);
 
-    {
-        lv_obj_t* hint = lv_label_create(page_main_);
-        lv_label_set_text(hint, "Select a remote");
-        lv_obj_set_style_text_color(hint, lv_color_hex(0xEEEEEE), 0);
-    }
 
     lv_obj_t* list_row = lv_obj_create(page_main_);
     lv_obj_set_width(list_row, LV_PCT(100));
@@ -102,11 +98,6 @@ void AppRemote::onOpen(lv_obj_t* window_root) {
     lv_obj_add_event_cb(btn_back_, on_back_clicked, LV_EVENT_CLICKED, this);
     { lv_obj_t* l = lv_label_create(btn_back_); lv_label_set_text(l, LV_SYMBOL_LEFT); lv_obj_center(l); }
 
-    lv_obj_t* title = lv_label_create(top_row);
-    lv_label_set_text(title, "ESP-NOW Micro Car");
-    lv_obj_set_style_text_color(title, lv_color_hex(0xEEEEEE), 0);
-    lv_label_set_long_mode(title, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_flex_grow(title, 1);
 
     info_box_ = lv_obj_create(page_microcar_);
     lv_obj_set_size(info_box_, LV_PCT(100), LV_PCT(100));
@@ -120,20 +111,16 @@ void AppRemote::onOpen(lv_obj_t* window_root) {
     lv_obj_set_flex_align(info_box_, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_clear_flag(info_box_, LV_OBJ_FLAG_SCROLLABLE);
     {
-        lv_obj_t* img = lv_img_create(info_box_);
-        lv_img_set_src(img, &remote_microcar);
-        lv_obj_set_style_pad_bottom(img, 8, 0);
         label_status_ = lv_label_create(info_box_);
         lv_label_set_text(label_status_, "ESP-NOW: Idle");
         lv_obj_set_style_text_color(label_status_, lv_color_hex(0xEEEEEE), 0);
-        label_cmd_ = lv_label_create(info_box_);
-        lv_label_set_text(label_cmd_, "Cmd: C_ST");
-        lv_obj_set_style_text_color(label_cmd_, lv_color_hex(0xBBBBBB), 0);
     }
 
     rebuildFocusFor(page_main_, btn_microcar_);
 }
+#endif
 
+#if 0
 void AppRemote::onClose() {
     item_index_.clear();
     root_ = nullptr;
@@ -377,3 +364,4 @@ uint8_t AppRemote::compute_keys_mask() const {
     if (M5Cardputer.Keyboard.isKeyPressed('L') || M5Cardputer.Keyboard.isKeyPressed('l')) m |= 0x20;
     return m;
 }
+#endif
