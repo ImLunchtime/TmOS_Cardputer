@@ -2,6 +2,7 @@
 #include <lvgl.h>
 
 LV_IMG_DECLARE(remote_microcar);
+LV_IMG_DECLARE(remote_keyboard_tips);
 
 void AppRemote::onOpen(lv_obj_t* window_root) {
     root_ = window_root;
@@ -66,7 +67,7 @@ void AppRemote::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_radius(page_microcar_, 0, 0);
     lv_obj_set_style_bg_opa(page_microcar_, LV_OPA_TRANSP, 0);
     lv_obj_set_style_pad_all(page_microcar_, 0, 0);
-    lv_obj_set_style_pad_row(page_microcar_, 6, 0);
+    lv_obj_set_style_pad_row(page_microcar_, 4, 0);
     lv_obj_set_flex_flow(page_microcar_, LV_FLEX_FLOW_COLUMN);
     lv_obj_add_flag(page_microcar_, LV_OBJ_FLAG_HIDDEN);
 
@@ -92,9 +93,17 @@ void AppRemote::onOpen(lv_obj_t* window_root) {
     lv_obj_add_event_cb(btn_back_, on_back_clicked, LV_EVENT_CLICKED, this);
     { lv_obj_t* l = lv_label_create(btn_back_); lv_label_set_text(l, LV_SYMBOL_LEFT); lv_obj_center(l); }
 
-    label_status_ = lv_label_create(page_microcar_);
+    label_status_ = lv_label_create(top_row);
     lv_label_set_text(label_status_, "ESP-NOW: Idle");
     lv_obj_set_style_text_color(label_status_, lv_color_hex(0xEEEEEE), 0);
+
+    {
+        lv_obj_t* img_tips = lv_img_create(page_microcar_);
+        lv_img_set_src(img_tips, &remote_keyboard_tips);
+        lv_obj_set_style_pad_top(img_tips, 0, 0);
+        lv_obj_set_style_pad_bottom(img_tips, 2, 0);
+        lv_obj_add_flag(img_tips, LV_OBJ_FLAG_USER_1);
+    }
 
     info_box_ = lv_obj_create(page_microcar_);
     lv_obj_set_size(info_box_, LV_PCT(100), LV_PCT(100));
@@ -102,7 +111,7 @@ void AppRemote::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_border_width(info_box_, 0, 0);
     lv_obj_set_style_bg_opa(info_box_, LV_OPA_TRANSP, 0);
     lv_obj_set_style_pad_all(info_box_, 6, 0);
-    lv_obj_set_style_pad_row(info_box_, 6, 0);
+    lv_obj_set_style_pad_row(info_box_, 4, 0);
     lv_obj_set_style_pad_column(info_box_, 6, 0);
     lv_obj_set_flex_flow(info_box_, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(info_box_, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
