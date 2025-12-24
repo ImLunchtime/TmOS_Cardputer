@@ -89,6 +89,7 @@ private:
     lv_obj_t* disc_img_ = nullptr;
     lv_obj_t* lyrics_container_ = nullptr;
     lv_obj_t* lyrics_label_ = nullptr;
+    lv_obj_t* fab_open_player_ = nullptr;
 
     // View state
     bool in_player_mode_ = false;
@@ -199,6 +200,7 @@ private:
     static void on_artist_item_clicked(lv_event_t* e);
     static void on_album_item_clicked(lv_event_t* e);
     static void on_track_item_clicked(lv_event_t* e);
+    static void on_fab_open_player_clicked(lv_event_t* e);
 
     // Audio task (runs on its own core)
     void initializeAudioTask();

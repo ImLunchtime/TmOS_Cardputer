@@ -55,6 +55,22 @@ void AppMusic::buildUI(lv_obj_t* parent) {
     lv_obj_set_style_pad_all(list_, 0, 0);
     lv_obj_set_style_bg_opa(list_, LV_OPA_TRANSP, LV_PART_SCROLLBAR);
 
+    fab_open_player_ = lv_btn_create(parent);
+    lv_obj_set_size(fab_open_player_, 22, 22);
+    lv_obj_add_flag(fab_open_player_, LV_OBJ_FLAG_IGNORE_LAYOUT);
+    lv_obj_align(fab_open_player_, LV_ALIGN_BOTTOM_RIGHT, -6, -6);
+    lv_obj_set_style_radius(fab_open_player_, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_bg_color(fab_open_player_, lv_color_white(), 0);
+    lv_obj_set_style_bg_opa(fab_open_player_, LV_OPA_COVER, 0);
+    lv_obj_set_style_border_width(fab_open_player_, 0, 0);
+    lv_obj_set_style_shadow_opa(fab_open_player_, LV_OPA_40, 0);
+    lv_obj_t* fab_label = lv_label_create(fab_open_player_);
+    lv_label_set_text(fab_label, LV_SYMBOL_PLAY);
+    lv_obj_set_style_text_color(fab_label, kMusicAccent, 0);
+    lv_obj_center(fab_label);
+    lv_obj_add_flag(fab_open_player_, LV_OBJ_FLAG_CLICK_FOCUSABLE);
+    lv_obj_add_event_cb(fab_open_player_, on_fab_open_player_clicked, LV_EVENT_CLICKED, this);
+
     player_view_ = lv_obj_create(parent);
     lv_obj_set_size(player_view_, lv_pct(100), lv_pct(100));
     lv_obj_set_flex_grow(player_view_, 1);
@@ -179,6 +195,7 @@ void AppMusic::updateNowPlaying(const char* text) {
 void AppMusic::switchToPlayerView(const char* trackName) {
     if (list_) lv_obj_add_flag(list_, LV_OBJ_FLAG_HIDDEN);
     if (player_view_) lv_obj_clear_flag(player_view_, LV_OBJ_FLAG_HIDDEN);
+    if (fab_open_player_) lv_obj_add_flag(fab_open_player_, LV_OBJ_FLAG_HIDDEN);
     in_player_mode_ = true;
     if (track_name_) lv_label_set_text(track_name_, trackName ? trackName : "-");
     rebuildFocusGroup();
@@ -187,6 +204,7 @@ void AppMusic::switchToPlayerView(const char* trackName) {
 void AppMusic::switchToListView() {
     if (player_view_) lv_obj_add_flag(player_view_, LV_OBJ_FLAG_HIDDEN);
     if (list_) lv_obj_clear_flag(list_, LV_OBJ_FLAG_HIDDEN);
+    if (fab_open_player_) lv_obj_clear_flag(fab_open_player_, LV_OBJ_FLAG_HIDDEN);
     in_player_mode_ = false;
     rebuildFocusGroup();
 }
@@ -282,6 +300,9 @@ void AppMusic::rebuildFocusGroup() {
     lv_group_remove_all_objs(grp);
     lv_obj_t* root = in_player_mode_ ? player_view_ : list_;
     if (root) add_focusables_recursive(root, grp);
+    if (!in_player_mode_ && fab_open_player_ && is_focusable(fab_open_player_)) {
+        lv_group_add_obj(grp, fab_open_player_);
+    }
     lv_obj_t* focus = nullptr;
     if (!in_player_mode_) {
         if (list_) {
@@ -401,22 +422,41 @@ void AppMusic::updateUIFromAudioStatus() {
             }
             uint32_t elapsed = lyric_start_ms_ ? millis() - lyric_start_ms_ - lyric_pause_accum_ms_ : 0;
             updateLyrics(elapsed);
-        } else if (audioStatus_.isPaused) {
-            updateNowPlaying("Paused");
-            updateStatus("Paused");
-            if (lyric_pause_start_ms_ == 0) lyric_pause_start_ms_ = millis();
-        } else {
-            updateNowPlaying("-");
-        }
-        if (audioStatus_.hasError && strlen(audioStatus_.errorMessage) > 0) {
-            updateStatus(audioStatus_.errorMessage);
-            if (!error_notified_) {
-                ui_notify::showSymbol(LV_SYMBOL_WARNING, audioStatus_.errorMessage, 2500);
+    } else if (audioStatus_.isPaused) {
+        updateNowPlaying("Paused");
+        updateStatus("Paused");
+        if (lyric_pause_start_ms_ == 0) lyric_pause_start_ms_ = millis();
+    } else {
+            updateNowPlaying("Not Playing");
+    }
+    if (audioStatus_.hasError && strlen(audioStatus_.errorMessage) > 0) {
+        updateStatus(audioStatus_.errorMessage);
+        if (!error_notified_) {
+            ui_notify::showSymbol(LV_SYMBOL_WARNING, audioStatus_.errorMessage, 2500);
                 error_notified_ = true;
             }
         } else {
             error_notified_ = false;
         }
         xSemaphoreGive(audioStatusMutex_);
+    }
+}
+
+void AppMusic::on_fab_open_player_clicked(lv_event_t* e) {
+    auto* app = static_cast<AppMusic*>(lv_event_get_user_data(e));
+    if (!app) return;
+    const char* name = nullptr;
+    if (app->audioStatusMutex_ && xSemaphoreTake(app->audioStatusMutex_, pdMS_TO_TICKS(1)) == pdTRUE) {
+        if (app->audioStatus_.isPlaying && !app->audioStatus_.isPaused) {
+            name = app->audioStatus_.currentSongName;
+        }
+        xSemaphoreGive(app->audioStatusMutex_);
+    }
+    if (name) {
+        app->switchToPlayerView(name);
+    } else {
+        app->switchToPlayerView("Not Playing");
+        app->updateStatus("Idle");
+        app->updateNowPlaying("Not Playing");
     }
 }
