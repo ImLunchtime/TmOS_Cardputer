@@ -10,15 +10,7 @@
 #include "apps/music/app_music.h"
 #include "apps/music_downloader/app_music_downloader.h"
 #include "apps/pictures/app_pictures.h"
-#include "apps/devices/app_devices.h"
-#include "apps/bluetooth/app_bluetooth.h"
-#include "apps/test/app_test.h"
-#include "apps/circuitsim/app_circuitsim.h"
-#include "apps/ux_editor/app_ux_editor.h"
 #include "apps/ux_executor/app_ux_executor.h"
-#include "apps/calculator/app_calculator.h"
-#include "apps/radiosim/app_radiosim.h"
-#include "apps/station_reporter/app_station_reporter.h"
 #include "apps/brightness/app_brightness.h"
 #include "apps/wifi/app_wifi.h"
 #include "apps/remote/app_remote.h"
@@ -26,16 +18,8 @@
 #include "drivers/input_kb.h"
 LV_IMG_DECLARE(icon_music_sd);
 LV_IMG_DECLARE(icon_music_cloud);
-LV_IMG_DECLARE(icon_test);
-LV_IMG_DECLARE(icon_devices);
-LV_IMG_DECLARE(icon_bluetooth);
 LV_IMG_DECLARE(icon_pictures);
-LV_IMG_DECLARE(icon_circuitsim2);
-LV_IMG_DECLARE(icon_uxedit2);
 LV_IMG_DECLARE(icon_uxexec);
-LV_IMG_DECLARE(icon_calculator);
-LV_IMG_DECLARE(icon_radio);
-LV_IMG_DECLARE(icon_station_reporter);
 LV_IMG_DECLARE(icon_brightness);
 LV_IMG_DECLARE(icon_wifi);
 LV_IMG_DECLARE(icon_remote);
@@ -59,23 +43,7 @@ static void on_music_dl_item_event(lv_event_t* e) {
 }
 
 
-static void on_test_item_event(lv_event_t* e) {
-    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
-    if (!launcher) return;
-    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchTest();
-}
-
-static void on_devices_item_event(lv_event_t* e) {
-    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
-    if (!launcher) return;
-    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchDevices();
-}
-
-static void on_bluetooth_item_event(lv_event_t* e) {
-    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
-    if (!launcher) return;
-    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchBluetooth();
-}
+static void on_test_item_event(lv_event_t* e) {}
 
 static void on_pictures_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
@@ -83,17 +51,9 @@ static void on_pictures_item_event(lv_event_t* e) {
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchPictures();
 }
 
-static void on_circuitsim_item_event(lv_event_t* e) {
-    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
-    if (!launcher) return;
-    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchCircuitSim();
-}
+ 
 
-static void on_ux_editor_item_event(lv_event_t* e) {
-    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
-    if (!launcher) return;
-    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchUXEditor();
-}
+static void on_ux_editor_item_event(lv_event_t* e) {}
 
 static void on_ux_executor_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
@@ -101,24 +61,12 @@ static void on_ux_executor_item_event(lv_event_t* e) {
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchUXExecutor();
 }
 
-static void on_calculator_item_event(lv_event_t* e) {
-    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
-    if (!launcher) return;
-    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchCalculator();
-}
+static void on_calculator_item_event(lv_event_t* e) {}
 
-static void on_radiosim_item_event(lv_event_t* e) {
-    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
-    if (!launcher) return;
-    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchRadioSim();
-}
+static void on_radiosim_item_event(lv_event_t* e) {}
 
 
-static void on_station_reporter_item_event(lv_event_t* e) {
-    auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
-    if (!launcher) return;
-    if (lv_event_get_code(e) == LV_EVENT_CLICKED) launcher->launchStationReporter();
-}
+ 
 
 static void on_wifi_item_event(lv_event_t* e) {
     auto* launcher = static_cast<AppLauncher*>(lv_event_get_user_data(e));
@@ -169,14 +117,7 @@ void AppLauncher::onOpen(lv_obj_t* window_root) {
         { &icon_music_cloud, on_music_dl_item_event },
         { &icon_pictures, on_pictures_item_event },
         { &icon_remote, on_remote_item_event },
-        { &icon_circuitsim2, on_circuitsim_item_event },
-        { &icon_station_reporter, on_station_reporter_item_event },
-        { &icon_uxedit2, on_ux_editor_item_event },
         { &icon_uxexec, on_ux_executor_item_event },
-        { &icon_devices, on_devices_item_event },
-        { &icon_bluetooth, on_bluetooth_item_event },
-        { &icon_radio, on_radiosim_item_event },
-        { &icon_test, on_test_item_event },
     };
     int index = 0;
     for (const auto& s : specs) {
@@ -203,16 +144,8 @@ void AppLauncher::launchMusic() { wm_.openApp(std::unique_ptr<IApp>(new AppMusic
 
 void AppLauncher::launchMusicDownloader() { wm_.openApp(std::unique_ptr<IApp>(new AppMusicDownloader())); }
  
-void AppLauncher::launchTest() { wm_.openApp(std::unique_ptr<IApp>(new AppTest())); }
-void AppLauncher::launchDevices() { wm_.openApp(std::unique_ptr<IApp>(new AppDevices())); }
-void AppLauncher::launchBluetooth() { wm_.openApp(std::unique_ptr<IApp>(new AppBluetooth())); }
 void AppLauncher::launchPictures() { wm_.openApp(std::unique_ptr<IApp>(new AppPictures())); }
-void AppLauncher::launchCircuitSim() { wm_.openApp(std::unique_ptr<IApp>(new AppCircuitSim())); }
-void AppLauncher::launchUXEditor() { wm_.openApp(std::unique_ptr<IApp>(new AppUXEditor())); }
 void AppLauncher::launchUXExecutor() { wm_.openApp(std::unique_ptr<IApp>(new AppUXExecutor(wm_))); }
-void AppLauncher::launchCalculator() { wm_.openApp(std::unique_ptr<IApp>(new AppCalculator())); }
-void AppLauncher::launchRadioSim() { wm_.openApp(std::unique_ptr<IApp>(new AppRadioSim())); }
-void AppLauncher::launchStationReporter() { wm_.openApp(std::unique_ptr<IApp>(new AppStationReporter())); }
 void AppLauncher::launchBrightness() { wm_.openApp(std::unique_ptr<IApp>(new AppBrightness())); }
 void AppLauncher::launchWiFi() { wm_.openApp(std::unique_ptr<IApp>(new AppWiFi())); }
 void AppLauncher::launchRemote() { wm_.openApp(std::unique_ptr<IApp>(new AppRemote())); }

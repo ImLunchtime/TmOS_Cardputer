@@ -26,16 +26,8 @@ public:
 
     void launchMusic();
     void launchMusicDownloader();
-    void launchTest();
-    void launchDevices();
-    void launchBluetooth();
     void launchPictures();
-    void launchCircuitSim();
-    void launchUXEditor();
     void launchUXExecutor();
-    void launchCalculator();
-    void launchRadioSim();
-    void launchStationReporter();
     void launchBrightness();
     void launchWiFi();
     void launchRemote();
