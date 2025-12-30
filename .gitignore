@@ -2,3 +2,5 @@
 .cache
 for_refrence_only
 .vscode
+compile_commands.json
+.trae
