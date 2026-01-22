@@ -1,6 +1,7 @@
 #include "apps/music/app_music.h"
 #include <SD.h>
 #include <cstring>
+#include "ui/ui_notify.h"
 
 static bool ends_with_ci(const std::string& s, const char* suffix) {
     size_t n = s.size();
@@ -52,13 +53,16 @@ void AppMusic::scanMusic() {
     paths_.clear();
     names_.clear();
     category_.clear();
+    current_index_ = -1;
+    list_level_ = LEVEL_ARTIST;
     if (list_) lv_obj_clean(list_);
-    addDir("/");
-    addDir("/music");
-    if (paths_.empty()) {
-        updateStatus("No MP3 files found");
+    sd_scan_done_ = false;
+    sd_scan_active_ = sd_.beginScan("/", ".mp3");
+    if (sd_scan_active_) {
+        updateStatus("Scanning Files");
+        ui_notify::showSymbol(LV_SYMBOL_REFRESH, "Scanning Files", 1000);
     } else {
-        updateStatus("Found MP3 files");
+        updateStatus("Failed to scan files");
     }
 }
 
@@ -87,4 +91,37 @@ void AppMusic::addDir(const char* dir) {
         file = root.openNextFile();
     }
     root.close();
+}
+
+void AppMusic::handleScanStep() {
+    if (!sd_scan_active_) return;
+    const int kMax = 8;
+    FileInfo tmp[kMax];
+    int cnt = 0;
+    bool cont = sd_.stepScan(tmp, cnt, kMax);
+    for (int i = 0; i < cnt; ++i) {
+        const FileInfo& f = tmp[i];
+        std::string path = f.path.c_str();
+        paths_.push_back(path);
+        names_.push_back(basename(path));
+        std::string base = names_.back();
+        std::string artist;
+        std::string album;
+        std::string title;
+        if (!parseNameParts(base, artist, album, title)) {
+            artist = "Uncategorized";
+            album = "Uncategorized";
+        }
+        category_[artist][album].push_back((int)paths_.size() - 1);
+    }
+    if (!cont) {
+        sd_scan_active_ = false;
+        sd_scan_done_ = true;
+        if (paths_.empty()) {
+            updateStatus("No MP3 files found");
+        } else {
+            updateStatus("Found MP3 files");
+            populateArtistList();
+        }
+    }
 }

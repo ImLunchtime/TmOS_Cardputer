@@ -53,7 +53,7 @@ void AppRemote::onOpen(lv_obj_t* window_root) {
         lv_obj_set_style_pad_bottom(img, 2, 0);
 
         lv_obj_t* lbl = lv_label_create(btn_microcar_);
-        lv_label_set_text(lbl, "ESP-NOW Car");
+        lv_label_set_text(lbl, "ESP-NOW Rover");
         lv_obj_set_width(lbl, 60);
         lv_label_set_long_mode(lbl, LV_LABEL_LONG_WRAP);
         lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, 0);

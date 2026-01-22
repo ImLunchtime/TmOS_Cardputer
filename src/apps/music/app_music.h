@@ -115,6 +115,8 @@ private:
 
     // SD manager for proper SPI pin setup
     SDFileManager sd_;
+    bool sd_scan_active_ = false;
+    bool sd_scan_done_ = false;
 
     // Audio components (owned by audio task)
     AudioFileSourceSD* file_ = nullptr;
@@ -183,6 +185,7 @@ private:
     void loadLyricsForPath(const std::string& mp3_path);
     void clearLyrics();
     void updateLyrics(uint32_t elapsed_ms);
+    void handleScanStep();
 
     // Playback
     void playIndex(int idx);

@@ -16,25 +16,27 @@ void AppPictures::onOpen(lv_obj_t* window_root) {
     lv_obj_set_style_pad_row(root_, 6, 0);
     lv_obj_set_style_text_font(root_, ui_theme::get_system_font(), 0);
 
-    if (!fm_.initialize()) { ui_notify::showSymbol(LV_SYMBOL_WARNING, "SD初始化失败", 2500); }
-
-    files_.clear();
-    const int kMax = 256;
-    std::vector<FileInfo> tmp(kMax);
-    int cnt = 0;
-    fm_.scanAllFiles(tmp.data(), cnt, kMax, ".bin");
-    for (int i = 0; i < cnt; ++i) {
-        // Filter: must start with "i_" but NOT "iec_"
-        if (tmp[i].name.startsWith("i_") && !tmp[i].name.startsWith("iec_")) {
-            files_.push_back(tmp[i]);
-        }
+    if (!fm_.initialize()) {
+        ui_notify::showSymbol(LV_SYMBOL_WARNING, "SD初始化失败", 2500);
+        return;
     }
 
-    build_list();
-    build_viewer();
-    build_password_view();
-    lv_obj_add_flag(viewer_, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(password_view_, LV_OBJ_FLAG_HIDDEN);
+    files_.clear();
+    current_index_ = -1;
+    scanning_ = fm_.beginScan("/", ".bin");
+    scan_done_ = false;
+    if (status_label_) {
+        lv_obj_del(status_label_);
+        status_label_ = nullptr;
+    }
+    status_label_ = lv_label_create(root_);
+    lv_label_set_text(status_label_, "Scanning Files");
+    lv_obj_center(status_label_);
+    ui_notify::showSymbol(LV_SYMBOL_REFRESH, "Scanning Files", 1000);
+    if (!scanning_) {
+        lv_label_set_text(status_label_, "Failed to scan files");
+        scan_done_ = true;
+    }
 
     kb_register_app_keys(this, {
         { ';', [this](){ return viewer_ && !lv_obj_has_flag(viewer_, LV_OBJ_FLAG_HIDDEN); }, [this](){ pan_step(0, -12); } },
@@ -44,6 +46,95 @@ void AppPictures::onOpen(lv_obj_t* window_root) {
         { '-', [this](){ return viewer_ && !lv_obj_has_flag(viewer_, LV_OBJ_FLAG_HIDDEN); }, [this](){ zoom_step(-32); } },
         { '=', [this](){ return viewer_ && !lv_obj_has_flag(viewer_, LV_OBJ_FLAG_HIDDEN); }, [this](){ zoom_step(32); } },
     });
+}
+
+void AppPictures::onTick() {
+    if (!scanning_) return;
+    const int kBatch = 8;
+    FileInfo tmp[kBatch];
+    int cnt = 0;
+    bool cont = fm_.stepScan(tmp, cnt, kBatch);
+    for (int i = 0; i < cnt; ++i) {
+        if (tmp[i].name.startsWith("i_") && !tmp[i].name.startsWith("iec_")) {
+            files_.push_back(tmp[i]);
+        }
+    }
+    if (!cont) {
+        scanning_ = false;
+        scan_done_ = true;
+        if (status_label_) {
+            lv_obj_del(status_label_);
+            status_label_ = nullptr;
+        }
+        build_list();
+        build_viewer();
+        build_password_view();
+        lv_obj_add_flag(viewer_, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(password_view_, LV_OBJ_FLAG_HIDDEN);
+        rebuildFocusGroup();
+    }
+}
+
+static bool app_pictures_is_focusable(lv_obj_t* obj) {
+    if (!lv_obj_is_valid(obj)) return false;
+    if (lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN)) return false;
+    if (lv_obj_has_class(obj, &lv_btn_class)) return true;
+    if (lv_obj_has_class(obj, &lv_textarea_class)) return true;
+    if (lv_obj_has_class(obj, &lv_dropdown_class)) return true;
+    if (lv_obj_has_class(obj, &lv_checkbox_class)) return true;
+    if (lv_obj_has_class(obj, &lv_slider_class)) return true;
+    if (lv_obj_has_class(obj, &lv_switch_class)) return true;
+    if (lv_obj_has_class(obj, &lv_spinbox_class)) return true;
+    if (lv_obj_has_class(obj, &lv_roller_class)) return true;
+    if (lv_obj_has_class(obj, &lv_img_class) && lv_obj_has_flag(obj, LV_OBJ_FLAG_USER_1)) return true;
+    if (lv_obj_is_editable(obj)) return true;
+    return false;
+}
+
+static void app_pictures_add_focusables_recursive(lv_obj_t* node, lv_group_t* group) {
+    if (!node || !group) return;
+    if (app_pictures_is_focusable(node)) lv_group_add_obj(group, node);
+    uint32_t child_cnt = lv_obj_get_child_cnt(node);
+    for (uint32_t i = 0; i < child_cnt; ++i) {
+        lv_obj_t* child = lv_obj_get_child(node, i);
+        app_pictures_add_focusables_recursive(child, group);
+    }
+}
+
+static lv_obj_t* app_pictures_find_first_focusable(lv_obj_t* node) {
+    if (!node) return nullptr;
+    if (app_pictures_is_focusable(node)) return node;
+    uint32_t child_cnt = lv_obj_get_child_cnt(node);
+    for (uint32_t i = 0; i < child_cnt; ++i) {
+        lv_obj_t* child = lv_obj_get_child(node, i);
+        lv_obj_t* res = app_pictures_find_first_focusable(child);
+        if (res) return res;
+    }
+    return nullptr;
+}
+
+void AppPictures::rebuildFocusGroup() {
+    lv_group_t* grp = kb_get_current_group();
+    if (!grp) return;
+    lv_group_remove_all_objs(grp);
+    if (root_) app_pictures_add_focusables_recursive(root_, grp);
+    lv_obj_t* focus = nullptr;
+    if (password_view_ && !lv_obj_has_flag(password_view_, LV_OBJ_FLAG_HIDDEN) && password_ta_) {
+        focus = password_ta_;
+    } else if (viewer_ && !lv_obj_has_flag(viewer_, LV_OBJ_FLAG_HIDDEN) && back_btn_) {
+        focus = back_btn_;
+    } else if (list_ && !lv_obj_has_flag(list_, LV_OBJ_FLAG_HIDDEN)) {
+        uint32_t cnt = lv_obj_get_child_cnt(list_);
+        for (uint32_t i = 0; i < cnt; ++i) {
+            lv_obj_t* c = lv_obj_get_child(list_, i);
+            if (app_pictures_is_focusable(c)) {
+                focus = c;
+                break;
+            }
+        }
+    }
+    if (!focus && root_) focus = app_pictures_find_first_focusable(root_);
+    if (focus) lv_group_focus_obj(focus);
 }
 
 void AppPictures::build_list() {
@@ -192,6 +283,7 @@ void AppPictures::show_image(int idx) {
     current_index_ = idx;
     lv_obj_add_flag(list_, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(viewer_, LV_OBJ_FLAG_HIDDEN);
+    rebuildFocusGroup();
 
     String p = files_[idx].path;
     if (!p.startsWith("/")) p = String("/") + p;
@@ -332,6 +424,7 @@ void AppPictures::on_back_clicked(lv_event_t* e) {
         lv_obj_add_flag(app->viewer_, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(app->list_, LV_OBJ_FLAG_HIDDEN);
         app->current_index_ = -1;
+        app->rebuildFocusGroup();
     }
 }
 
@@ -465,9 +558,7 @@ void AppPictures::on_decrypt_clicked(lv_event_t* e) {
     lv_obj_add_flag(app->list_, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(app->password_view_, LV_OBJ_FLAG_HIDDEN);
     lv_textarea_set_text(app->password_ta_, "");
-    lv_group_t* grp = kb_get_current_group();
-    if (grp) lv_group_add_obj(grp, app->password_ta_);
-    lv_group_focus_obj(app->password_ta_);
+    app->rebuildFocusGroup();
 }
 
 void AppPictures::on_password_submit(lv_event_t* e) {

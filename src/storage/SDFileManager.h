@@ -2,6 +2,7 @@
 #include <M5Cardputer.h>
 #include <SD.h>
 #include <SPI.h>
+#include <vector>
 
 // SD card SPI pin definitions for M5Cardputer / StampS3 base
 #define SD_SPI_SCK_PIN  40
@@ -26,6 +27,10 @@ class SDFileManager {
 private:
     bool initialized;
     String currentPath;
+    struct DirCtx { File dir; String path; };
+    std::vector<DirCtx> scanStack_;
+    String scanExt_;
+    bool scanActive_ = false;
     
     // Normalize path
     String normalizePath(const String& path) {
@@ -59,6 +64,7 @@ public:
     
     // Check if initialized
     bool isInitialized() const { return initialized; }
+    bool isScanning() const { return scanActive_; }
     
     // Get current path
     String getCurrentPath() const { return currentPath; }
@@ -283,5 +289,67 @@ public:
         String ext = getFileExtension(fileName);
         ext.toLowerCase();
         return ext == ".mp3" || ext == ".wav" || ext == ".m4a" || ext == ".aac";
+    }
+
+    bool beginScan(const String& root, const String& extension) {
+        if (!initialized) return false;
+        while (!scanStack_.empty()) {
+            if (scanStack_.back().dir) scanStack_.back().dir.close();
+            scanStack_.pop_back();
+        }
+        String r = normalizePath(root.length() ? root : String("/"));
+        File d = SD.open(r);
+        if (!d || !d.isDirectory()) { d.close(); return false; }
+        DirCtx ctx; ctx.dir = d; ctx.path = r;
+        scanStack_.push_back(ctx);
+        scanExt_ = extension;
+        scanActive_ = true;
+        return true;
+    }
+
+    bool stepScan(FileInfo* outList, int& outCount, int maxOut) {
+        if (!initialized || !scanActive_) { outCount = 0; return false; }
+        outCount = 0;
+        int processed = 0;
+        while (!scanStack_.empty() && outCount < maxOut) {
+            DirCtx& ctx = scanStack_.back();
+            File entry = ctx.dir.openNextFile();
+            if (!entry) {
+                ctx.dir.close();
+                scanStack_.pop_back();
+                continue;
+            }
+            processed++;
+            String name = entry.name();
+            String path = entry.path();
+            bool isDir = entry.isDirectory();
+            if (isDir) {
+                File sub = SD.open(path);
+                if (sub && sub.isDirectory()) {
+                    DirCtx subctx; subctx.dir = sub; subctx.path = path;
+                    scanStack_.push_back(subctx);
+                } else {
+                    sub.close();
+                }
+            } else {
+                bool add = scanExt_.isEmpty();
+                if (!scanExt_.isEmpty()) {
+                    String nm = name; nm.toLowerCase();
+                    String ex = scanExt_; ex.toLowerCase();
+                    add = nm.endsWith(ex);
+                }
+                if (add) {
+                    String display = name;
+                    int lastSlash = display.lastIndexOf('/');
+                    if (lastSlash != -1) display = display.substring(lastSlash + 1);
+                    size_t sz = entry.size();
+                    outList[outCount++] = FileInfo(display, path, false, sz);
+                }
+            }
+            entry.close();
+            if (processed >= maxOut * 4) break;
+        }
+        if (scanStack_.empty()) { scanActive_ = false; }
+        return scanActive_;
     }
 };

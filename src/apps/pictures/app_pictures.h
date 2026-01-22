@@ -14,7 +14,7 @@ public:
     ui_theme::ThemeId theme() const override { return ui_theme::ThemeId::Dark; }
 
     void onOpen(lv_obj_t* window_root) override;
-    void onTick() override {}
+    void onTick() override;
     void onClose() override;
 
 private:
@@ -47,6 +47,11 @@ private:
     SDFileManager fm_;
     int current_index_ = -1;
     lv_obj_t* decrypt_btn_ = nullptr;
+    bool scanning_ = false;
+    bool scan_done_ = false;
+    lv_obj_t* status_label_ = nullptr;
+
+    void rebuildFocusGroup();
 
     void build_list();
     void build_viewer();

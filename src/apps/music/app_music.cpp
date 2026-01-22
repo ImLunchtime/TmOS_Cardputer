@@ -31,9 +31,7 @@ void AppMusic::onOpen(lv_obj_t* window_root) {
     initializeAudioTask();
     sendAudioCommand(AUDIO_CMD_VOLUME, 1);
 
-    // Scan SD for music files
     scanMusic();
-    populateArtistList();
 
     // Register keyboard shortcuts for volume control
     kb_register_app_keys(this, {
@@ -48,6 +46,7 @@ void AppMusic::onTick() {
     // Drive UI updates from audio status and handle next/prev requests
     handleNextPrevRequests();
     updateUIFromAudioStatus();
+    handleScanStep();
 }
 
 void AppMusic::onClose() {

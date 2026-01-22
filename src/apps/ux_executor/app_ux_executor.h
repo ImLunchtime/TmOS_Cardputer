@@ -19,7 +19,7 @@ public:
     const char* title() const override { return "UX Executor"; }
     ui_theme::ThemeId theme() const override { return ui_theme::ThemeId::Dark; }
     void onOpen(lv_obj_t* window_root) override;
-    void onTick() override {}
+    void onTick() override;
     void onClose() override {}
     void refresh_list();
     void run_current();
@@ -32,4 +32,7 @@ private:
     String current_path_;
     std::vector<FileInfo> files_;
     std::unordered_map<lv_obj_t*, int> item_index_;
+    bool scanning_ = false;
+    lv_obj_t* status_label_ = nullptr;
+    void rebuildFocusGroup();
 };
